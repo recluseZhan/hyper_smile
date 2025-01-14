@@ -1,0 +1,33 @@
+enclave {
+	
+	trusted {
+        public void mem_cpy( unsigned long *dst, unsigned long *src, unsigned long size );
+        public int exception_handler(sgx_exception_info_t *info);
+        public create_exception(int flag);
+        public add_hooks_for_exception();
+        public inner_function();
+        public printf(const char* fmt, ...);
+        public redirect_mem_to_noepc(unsigned long *dst, unsigned long tcs );
+        public print_data_from_v(unsigned long *adrs);
+        public print_code_from_v(unsigned long *adrs);
+        public manage_rsa(uint8_t *p_key1, unsigned long *dst);
+        public create_secret(uint8_t *p_src, uint8_t* p_dst);
+        public create_secret1(uint8_t *p_src, uint8_t* p_dst, uint8_t* p_key);
+        public process_secret(uint8_t *p_dst,uint8_t *plaintxt);
+        public one_time_dump_memory(int counter, unsigned long *dst);
+        public sgx_status_t sgx_create_report_define(const sgx_target_info_t *target_info, const sgx_report_data_t *report_data, sgx_report_t *report);
+        public worker(unsigned long *dst);
+        public addint(unsigned long a, unsigned long b, unsigned long *dst);
+        
+        public void mem_cpy( unsigned long *dst, unsigned long *src, unsigned long size );
+        public void decryptMessage(char *encMessageIn, size_t len, char *decMessageOut, size_t lenOut);
+        public void encryptMessage(char *decMessageIn, size_t len, char *encMessageOut, size_t lenOut);
+        public int do_ereport(const sgx_target_info_t *target_info, const sgx_report_data_t *report_data, sgx_report_t *report);
+        public int do_egetkey(const sgx_key_request_t *key_request, sgx_key_128bit_t *key);
+        public uint32_t do_rdrand(uint32_t *rand);
+
+    };
+	
+	untrusted {
+	};
+};

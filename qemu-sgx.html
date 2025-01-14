@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Install SGX in the qemu virtual machine</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h1>QEMU虚拟机内安装SGX SDK</h1>
+<hr />
+<p>本文介绍了在支持SGX的主机上如何安装QEMU并打开其SGX支持，以及在QEMU中成功安装SGX的过程（请注意：实验暂时没有安装SGX PSW，所以本文不包含PSW的安装过程，关于PSW的安装过程可以参照文末的参考文章3和4）。</p>
+<p>实验所用的系统如下:</p>
+<ul>
+<li>主机CPU：Intel(R) Core(TM) i7-9700 CPU @3.00Hz;</li>
+<li>主机和虚拟机操作系统：Ubuntu 20.04 LTS;</li>
+<li>主机和虚拟机内核：5.15.0-52-generic;</li>
+<li>QEMU：7.1.50。</li>
+</ul>
+<h2>安装QEMU VM并开启SGX支持</h2>
+<p>为了在QEMU虚拟机中使用SGX，一定要确保以下几点：</p>
+<ul>
+<li>主机操作系统一定支持Intel SGX；</li>
+<li>一定在主机BIOS里打开Intel SGX选项；</li>
+<li>如果要在客户机系统中灵活启动控制，硬件也必须支持该功能；</li>
+<li>主机和虚拟机的Linux内核版本在5.13及以上。</li>
+</ul>
+<h3>构建最新版QEMU</h3>
+<pre><code>    # 通过检查kernel日志来验证SGX驱动程序是否已加载
+    dmesg | grep sgx
+
+    # 获取QEMU-SGX
+    git clone https://github.com/qemu/qemu
+
+    # 安装相关依赖
+    sudo apt install git libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev
+    sudo apt install git-email libaio-dev libbluetooth-dev libbrlapi-dev libbz2-dev libcap-dev libcap-ng-dev libcurl4-gnutls-dev libgtk-3-dev libibverbs-dev libjpeg8-dev libncurses5-dev libnuma-dev librbd-dev librdmacm-dev libsasl2-dev libsdl1.2-dev libseccomp-dev libsnappy-dev libssh2-1-dev libvde-dev libvdeplug-dev libxen-dev liblzo2-dev valgrind xfslibs-dev libnfs-dev libiscsi-dev
+
+    # 所使用的QEMU版本需要用ninja build编译
+    sudo pip3 install meson ninja
+    # 如果依旧遇到错误: ModuleNotFoundError: No module named 'mesonbuild'
+    # 可以尝试使用如下命令解决
+    sudo -i
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    python3 get-pip.py
+    python3 -m pip install meson
+
+    # 安装和更新QEMU子模块
+    scripts/git-submodule.sh update ui/keycodemapdb tests/fp/berkeley-testfloat-3 tests/fp/berkeley-softfloat-3 dtc
+
+    # 对获得的qemu目录中的hw/core/qdev.c文件打patch，防止SGX-EPC无效
+    # 由于补丁文件的行数可能不对，所以建议手动更改
+    # 补丁文件的地址如下：
+    # https://lore.kernel.org/qemu-devel/20211130121536.GA32686@yangzhon-Virtual/
+    # 补丁内容如下：
+        One temp patch to create one /sgx in the /machine in the device_set_realized() 
+    diff --git a/hw/core/qdev.c b/hw/core/qdev.c
+    index 84f3019440..4154eef0d8 100644
+    --- a/hw/core/qdev.c
+    +++ b/hw/core/qdev.c
+    @@ -497,7 +497,7 @@ static void device_set_realized(Object *obj, bool value, Error **errp)
+         NamedClockList *ncl;
+         Error *local_err = NULL;
+         bool unattached_parent = false;
+    -    static int unattached_count;
+    +    static int unattached_count, sgx_count;
+
+         if (dev-&gt;hotplugged &amp;&amp; !dc-&gt;hotpluggable) {
+
+             error_setg(errp, QERR_DEVICE_NO_HOTPLUG, object_get_typename(obj));
+    @@ -509,7 +509,15 @@ static void device_set_realized(Object *obj, bool value, Error **errp)
+                 goto fail;
+             }
+    -        if (!obj-&gt;parent) {
+
+    +        if (!obj-&gt;parent &amp;&amp; !strcmp(object_get_typename(obj), &quot;sgx-epc&quot;)) {
+
+    +            gchar *name = g_strdup_printf(&quot;device[%d]&quot;, sgx_count++);
+    +
+    +            object_property_add_child(container_get(qdev_get_machine(),
+    +                                                    &quot;/sgx&quot;),
+    +                                      name, obj);
+    +            unattached_parent = true;
+    +            g_free(name);
+    +        } else if (!obj-&gt;parent) {
+
+                 gchar *name = g_strdup_printf(&quot;device[%d]&quot;, unattached_count++);
+                 object_property_add_child(container_get(qdev_get_machine()
+
+    This patch can make sure vcpu is still /machine/unattached/device[0].
+
+    # 编译
+    mkdir build
+    cd build
+    ../configure --with-git-submodules=ignore --enable-kvm --enable-vnc --enable-curses --enable-spice --enable-gtk --target-list=x86_64-softmmu --disable-werror
+    make -j8
+    # 如果遇到错误:Dependency &quot;spice-server&quot; not found, tried pkgconfig
+    # 可以尝试使用如下命令解决
+    sudo apt install libspice-protocol-dev
+    sudo apt install libspice-server-dev
+
+    # 验证QEMU以检查SGX功能
+    # https://github.com/qemu/qemu/blob/master/docs/system/i386/sgx.rst
+    $ sudo x86_64-softmmu/qemu-system-x86_64 -cpu help | xargs printf &quot;%s\n&quot; | grep sgx
+
+    # 默认QEMU安装路径：/usr/local/bin
+    sudo make install
+
+    # 将/usr/local/bin加入PATH
+    export PATH=$PATH:/usr/local/bin
+</code></pre>
+
+<h3>安装Libvirt</h3>
+<p>虽然可以直接在命令行上运行qemu-system-x86_64二进制文件，但冗长的命令行和复杂的选项可能会使其变得笨拙。Libvirt 提供了一个完整的管理套件，极大地简化了虚拟机的创建、执行和维护。</p>
+<pre><code>    sudo apt install libvirt-clients virt-manager virtinst
+</code></pre>
+
+<h3>配置AppArmor</h3>
+<p>libvirt的默认配置不允许在/usr/local/bin中执行程序，所以可以使用AppArmor。AppArmor 是一个强制访问控制（MAC）系统，默认情况下安装在Ubuntu 20.04中。</p>
+<pre><code>    # 在文件/etc/apparmor.d/local/usr.sbin.libvirtd中添加如下内容
+    /usr/local/bin/* PUx,
+
+    # 重新加载AppArmor配置文件
+    sudo apparmor_parser -r /etc/apparmor.d/usr.sbin.libvirtd
+</code></pre>
+
+<h3>在Libvirt中配置QEMU</h3>
+<pre><code>    # QEMU-SGX需要访问如下内容
+    # /dev/sgx_enclave 启动enclaves
+    # /dev/sgx_provision 启动PCE
+    # /dev/sgx_vepc 分配EPC内存页
+
+    # 这些内容在libvirt的cgroup控制器中默认关闭
+    # 编辑/etc/libvirt/qemu.conf并更改cgroup_device_acl以开启上述内容
+    cgroup_device_acl = [
+        &quot;/dev/null&quot;, &quot;/dev/full&quot;, &quot;/dev/zero&quot;,
+        &quot;/dev/random&quot;, &quot;/dev/urandom&quot;,
+        &quot;/dev/ptmx&quot;, &quot;/dev/kvm&quot;,
+        &quot;/dev/rtc&quot;,&quot;/dev/hpet&quot;,
+        &quot;/dev/sgx_enclave&quot;, &quot;/dev/sgx_provision&quot;, &quot;/dev/sgx_vepc&quot;
+    ]
+
+    # QEMU需要读写/dev/sgx_vepc，但它属于root持有
+    # 修改/etc/libvirt/qemu.conf，将libvirt中的QEMU设置为以root用户执行
+    user = &quot;root&quot;
+
+    # 默认情况下，libvirt为QEMU实现了安全驱动程序
+    # Security-Enhanced Linux (SELinux)和AppArmor
+    # 如果设置为AppArmor，请将参数设置为 “apparmor”
+    security_driver = [ &quot;apparmor&quot; ]
+
+    # 并修改/etc/apparmor.d/libvirt/TEMPLATE.qemu
+    #include &lt;tunables/global&gt;
+    profile LIBVIRT_TEMPLATE flags=(attach_disconnected) {      
+      #include &lt;abstractions/libvirt-qemu&gt;
+      /usr/local/bin/* PUx,
+    }
+
+    # 重新启动libvirtd服务
+    sudo systemctl restart libvirtd
+
+    # 验证登录用户是否包含libvirt group
+    groups
+</code></pre>
+
+<h3>创建VM</h3>
+<p>创建VM的方法主要有：
+- 使用virt-manager创建VM；
+- 在命令行上创建VM；
+- 使用virt-install创建VM。
+- 实验选用了virt-manager创建VM的方法，注意Chipset选择Q35。</p>
+<pre><code>    # 打开虚拟机 ${vm_name}
+    virsh start ${vm_name}
+
+    # 查看所有虚拟机
+    virsh list --all
+
+    # 停止正在运行的虚拟机 ${vm_name}
+    virsh destroy ${vm_name}
+</code></pre>
+
+<h3>在VM中增加SGX支持</h3>
+<pre><code>    # 确保虚拟机关机
+    virsh shutdown ${vm_name}
+
+    # 修改${vm_name}.xml文件
+    # 在文件正文第一行添加如下内容
+    &lt;domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'&gt;
+    # 在文件尾部&lt;/devices&gt;&lt;/domain&gt;中间添加如下内容
+    # 注意size不能超过内存预留给SGX的空间大小
+    &lt;qemu:commandline&gt;
+        &lt;qemu:arg value='-cpu'/&gt;
+        &lt;qemu:arg value='host,+sgx-provisionkey,+sgx2,+sgxlc,+sgx-kss'/&gt;
+        &lt;qemu:arg value='-object'/&gt;
+        &lt;qemu:arg value='memory-backend-epc,id=mem1,size=64M,prealloc=on'/&gt;
+        &lt;qemu:arg value='-M'/&gt;
+        &lt;qemu:arg value='sgx-epc.0.memdev=mem1,sgx-epc.0.node=0'/&gt;
+    &lt;/qemu:commandline&gt;
+
+    # 卸载虚拟机 ${vm_name}
+    virsh undefine ${vm_name}
+
+    # 加载虚拟机 ${vm_name}.xml file
+    virsh define ${vm_name}.xml
+
+    # 开启虚拟机 ${vm_name}
+    virsh start ${vm_name}
+
+    # 检查虚拟机SGX支持情况
+    sudo cat /proc/cpuinfo | grep sgx
+</code></pre>
+
+<p><strong>如果虚拟机成功支持了SGX，那么恭喜！可以进行下一步——在虚拟机中安装并使用SGX SDK！</strong></p>
+<h3>VM内安装SGX</h3>
+<p>请注意接下来的操作均在虚拟机 $ (vm_name)内操作。为了构建Intel(R) SGX SDK，请保证GCC在7.3及以上，glibc版本在2.27及以上。</p>
+<h3>安装相关依赖</h3>
+<pre><code>    # 安装编译SGX SDK所使用的工具
+    sudo apt-get install build-essential ocaml ocamlbuild automake autoconf libtool wget python-is-python3 libssl-dev git cmake perl
+    sudo apt-get install build-essential python
+
+    # 安装dkms
+    sudo apt-get install dkms
+</code></pre>
+
+<h3>安装SGX driver</h3>
+<pre><code>    # 获取OOT driver
+    sudo wget - https://download.01.org/intel-sgx/sgx-linux/2.15.1/distro/ubuntu20.04-server/sgx_linux_x64_driver_${version}.bin
+
+    # 增加文件权限
+    sudo chmod 777 sgx_linux_x64_* 
+
+    # 安装SGX driver
+    ./sgx_linux_x64_driver_${version}.bin
+</code></pre>
+
+<h3>安装SGX SDK</h3>
+<pre><code>    # 获取SGX SDK
+    git clone https://github.com/intel/linux-sgx.git
+
+    # 注意make preparation会执行./download_prebuilt.sh，下载external/toolset目录下的相关工具。
+    cd linux-sgx
+    make preparation
+
+    # 把准备好的工具列表添加到全局变量中，方便后续编译工作的展开
+    sudo cp external/toolset/ubuntu20.04/* /usr/local/bin/
+    # 检查是否添加成功
+    which ar as ld objcopy objdump ranlib
+
+    # 编译sdk和sdk安装器
+    # 注意选择DEBUG=1，可以在安装成功后使用时看到DEBUG过程
+    make sdk DEBUG=1
+    make sdk_install_pkg DEBUG=1
+
+    # 编译完成后，会在linux/installer/bin/目录下看到sgx_linux_x64_sdk_${version}.bin类似的文件
+    # 执行该文件安装sdk
+    # 注意：安装过程会让选择安装路径，在是否选择当前目录时输入no，更改安装路径为/opt/intel/
+    cd linux/installer/bin
+    ./sgx_linux_x64_sdk_${version}.bin
+
+    # 设置环境变量source ${sgx-sdk-install-path}/environment
+    source /opt/intel/sgxsdk/environment
+</code></pre>
+
+<p><strong>尝试编译运行SampleCode里的例子, 如果运行成功，那么恭喜！成功在虚拟机内安装SGX SDK!</strong></p>
+<h2>参考文章</h2>
+<p>本文实验过程的主要参考文章链接如下:</p>
+<ol>
+<li>https://www.intel.com/content/www/us/en/developer/articles/technical/virtualizing-intel-software-guard-extensions-with-kvm-and-qemu.html</li>
+<li>https://www.cxybb.com/article/spuyan/122387894</li>
+<li>https://blog.csdn.net/renshy5/article/details/120828738</li>
+<li>https://github.com/intel/linux-sgx</li>
+</ol>
+<p align="right">若有理解和操作不当之处，欢迎批评指正。</p>
+<p align="right">zhanjx, 2022.11.02</p>
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

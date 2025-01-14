@@ -1,0 +1,8 @@
+obj-m += check1.o
+check1-objs := check.o
+
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) modules
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(shell pwd) clean
+

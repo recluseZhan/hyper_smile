@@ -1,0 +1,576 @@
+
+encl.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <exception_handler>:
+   0:	f3 0f 1e fa          	endbr64 
+   4:	31 c0                	xor    %eax,%eax
+   6:	c3                   	ret    
+
+0000000000000007 <print_data_from_v>:
+   7:	f3 0f 1e fa          	endbr64 
+   b:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 12 <print_data_from_v+0xb>
+  12:	48 89 07             	mov    %rax,(%rdi)
+  15:	48 8b 05 00 00 00 00 	mov    0x0(%rip),%rax        # 1c <print_data_from_v+0x15>
+  1c:	48 89 47 08          	mov    %rax,0x8(%rdi)
+  20:	c3                   	ret    
+
+0000000000000021 <redirect_mem_to_noepc>:
+  21:	f3 0f 1e fa          	endbr64 
+  25:	48 89 f8             	mov    %rdi,%rax
+  28:	48 8d 14 f5 00 10 00 	lea    0x1000(,%rsi,8),%rdx
+  2f:	00 
+  30:	b9 d3 03 00 00       	mov    $0x3d3,%ecx
+  35:	48 89 d7             	mov    %rdx,%rdi
+  38:	48 89 c6             	mov    %rax,%rsi
+  3b:	f3 a5                	rep movsl %ds:(%rsi),%es:(%rdi)
+  3d:	c3                   	ret    
+
+000000000000003e <get_a_addr>:
+  3e:	f3 0f 1e fa          	endbr64 
+  42:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 49 <get_a_addr+0xb>
+  49:	c3                   	ret    
+
+000000000000004a <get_code_addr>:
+  4a:	f3 0f 1e fa          	endbr64 
+  4e:	48 8b 05 00 00 00 00 	mov    0x0(%rip),%rax        # 55 <get_code_addr+0xb>
+  55:	c3                   	ret    
+
+0000000000000056 <enclave_dummy_call>:
+  56:	f3 0f 1e fa          	endbr64 
+  5a:	8b 05 00 00 00 00    	mov    0x0(%rip),%eax        # 60 <enclave_dummy_call+0xa>
+  60:	c3                   	ret    
+
+0000000000000061 <create_exception>:
+  61:	f3 0f 1e fa          	endbr64 
+  65:	53                   	push   %rbx
+  66:	48 8d 1d 00 00 00 00 	lea    0x0(%rip),%rbx        # 6d <create_exception+0xc>
+  6d:	48 89 de             	mov    %rbx,%rsi
+  70:	bf 0a 00 00 00       	mov    $0xa,%edi
+  75:	e8 00 00 00 00       	call   7a <create_exception+0x19>
+  7a:	48 85 c0             	test   %rax,%rax
+  7d:	74 1f                	je     9e <create_exception+0x3d>
+  7f:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 86 <create_exception+0x25>
+  86:	ff 05 00 00 00 00    	incl   0x0(%rip)        # 8c <create_exception+0x2b>
+  8c:	e8 00 00 00 00       	call   91 <create_exception+0x30>
+  91:	8b 3d 00 00 00 00    	mov    0x0(%rip),%edi        # 97 <create_exception+0x36>
+  97:	e8 00 00 00 00       	call   9c <create_exception+0x3b>
+  9c:	eb 0c                	jmp    aa <create_exception+0x49>
+  9e:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # a5 <create_exception+0x44>
+  a5:	e8 00 00 00 00       	call   aa <create_exception+0x49>
+  aa:	31 ff                	xor    %edi,%edi
+  ac:	48 89 de             	mov    %rbx,%rsi
+  af:	e8 00 00 00 00       	call   b4 <create_exception+0x53>
+  b4:	48 85 c0             	test   %rax,%rax
+  b7:	74 14                	je     cd <create_exception+0x6c>
+  b9:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # c0 <create_exception+0x5f>
+  c0:	ff 05 00 00 00 00    	incl   0x0(%rip)        # c6 <create_exception+0x65>
+  c6:	e8 00 00 00 00       	call   cb <create_exception+0x6a>
+  cb:	eb a0                	jmp    6d <create_exception+0xc>
+  cd:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # d4 <create_exception+0x73>
+  d4:	5b                   	pop    %rbx
+  d5:	e9 00 00 00 00       	jmp    da <add_hooks_for_exception>
+
+00000000000000da <add_hooks_for_exception>:
+  da:	f3 0f 1e fa          	endbr64 
+  de:	51                   	push   %rcx
+  df:	48 8d 35 00 00 00 00 	lea    0x0(%rip),%rsi        # e6 <add_hooks_for_exception+0xc>
+  e6:	bf 0a 00 00 00       	mov    $0xa,%edi
+  eb:	e8 00 00 00 00       	call   f0 <add_hooks_for_exception+0x16>
+  f0:	48 85 c0             	test   %rax,%rax
+  f3:	74 1f                	je     114 <add_hooks_for_exception+0x3a>
+  f5:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # fc <add_hooks_for_exception+0x22>
+  fc:	ff 05 00 00 00 00    	incl   0x0(%rip)        # 102 <add_hooks_for_exception+0x28>
+ 102:	e8 00 00 00 00       	call   107 <add_hooks_for_exception+0x2d>
+ 107:	8b 3d 00 00 00 00    	mov    0x0(%rip),%edi        # 10d <add_hooks_for_exception+0x33>
+ 10d:	e8 00 00 00 00       	call   112 <add_hooks_for_exception+0x38>
+ 112:	eb 0c                	jmp    120 <add_hooks_for_exception+0x46>
+ 114:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 11b <add_hooks_for_exception+0x41>
+ 11b:	e8 00 00 00 00       	call   120 <add_hooks_for_exception+0x46>
+ 120:	31 ff                	xor    %edi,%edi
+ 122:	48 8d 35 00 00 00 00 	lea    0x0(%rip),%rsi        # 129 <add_hooks_for_exception+0x4f>
+ 129:	e8 00 00 00 00       	call   12e <add_hooks_for_exception+0x54>
+ 12e:	48 85 c0             	test   %rax,%rax
+ 131:	74 18                	je     14b <add_hooks_for_exception+0x71>
+ 133:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 13a <add_hooks_for_exception+0x60>
+ 13a:	e8 00 00 00 00       	call   13f <add_hooks_for_exception+0x65>
+ 13f:	8b 3d 00 00 00 00    	mov    0x0(%rip),%edi        # 145 <add_hooks_for_exception+0x6b>
+ 145:	5a                   	pop    %rdx
+ 146:	e9 16 ff ff ff       	jmp    61 <create_exception>
+ 14b:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 152 <add_hooks_for_exception+0x78>
+ 152:	58                   	pop    %rax
+ 153:	e9 00 00 00 00       	jmp    158 <inner_function>
+
+0000000000000158 <inner_function>:
+ 158:	f3 0f 1e fa          	endbr64 
+ 15c:	50                   	push   %rax
+ 15d:	31 c0                	xor    %eax,%eax
+ 15f:	e8 00 00 00 00       	call   164 <inner_function+0xc>
+ 164:	31 c0                	xor    %eax,%eax
+ 166:	5a                   	pop    %rdx
+ 167:	c3                   	ret    
+
+0000000000000168 <printf>:
+ 168:	f3 0f 1e fa          	endbr64 
+ 16c:	55                   	push   %rbp
+ 16d:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+ 174:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+ 179:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+ 180:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+ 185:	48 81 ec d0 00 00 00 	sub    $0xd0,%rsp
+ 18c:	48 89 b4 24 28 20 00 	mov    %rsi,0x2028(%rsp)
+ 193:	00 
+ 194:	49 89 fa             	mov    %rdi,%r10
+ 197:	48 89 94 24 30 20 00 	mov    %rdx,0x2030(%rsp)
+ 19e:	00 
+ 19f:	48 89 8c 24 38 20 00 	mov    %rcx,0x2038(%rsp)
+ 1a6:	00 
+ 1a7:	4c 89 84 24 40 20 00 	mov    %r8,0x2040(%rsp)
+ 1ae:	00 
+ 1af:	4c 89 8c 24 48 20 00 	mov    %r9,0x2048(%rsp)
+ 1b6:	00 
+ 1b7:	84 c0                	test   %al,%al
+ 1b9:	74 40                	je     1fb <printf+0x93>
+ 1bb:	0f 29 84 24 50 20 00 	movaps %xmm0,0x2050(%rsp)
+ 1c2:	00 
+ 1c3:	0f 29 8c 24 60 20 00 	movaps %xmm1,0x2060(%rsp)
+ 1ca:	00 
+ 1cb:	0f 29 94 24 70 20 00 	movaps %xmm2,0x2070(%rsp)
+ 1d2:	00 
+ 1d3:	0f 29 9c 24 80 20 00 	movaps %xmm3,0x2080(%rsp)
+ 1da:	00 
+ 1db:	0f 29 a4 24 90 20 00 	movaps %xmm4,0x2090(%rsp)
+ 1e2:	00 
+ 1e3:	0f 29 ac 24 a0 20 00 	movaps %xmm5,0x20a0(%rsp)
+ 1ea:	00 
+ 1eb:	0f 29 b4 24 b0 20 00 	movaps %xmm6,0x20b0(%rsp)
+ 1f2:	00 
+ 1f3:	0f 29 bc 24 c0 20 00 	movaps %xmm7,0x20c0(%rsp)
+ 1fa:	00 
+ 1fb:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 202:	00 00 
+ 204:	48 89 84 24 18 20 00 	mov    %rax,0x2018(%rsp)
+ 20b:	00 
+ 20c:	31 c0                	xor    %eax,%eax
+ 20e:	48 8d 7c 24 28       	lea    0x28(%rsp),%rdi
+ 213:	b9 fc 07 00 00       	mov    $0x7fc,%ecx
+ 218:	0f 57 c0             	xorps  %xmm0,%xmm0
+ 21b:	48 8d 6c 24 18       	lea    0x18(%rsp),%rbp
+ 220:	4c 89 d2             	mov    %r10,%rdx
+ 223:	be 00 20 00 00       	mov    $0x2000,%esi
+ 228:	0f 11 44 24 18       	movups %xmm0,0x18(%rsp)
+ 22d:	c7 04 24 08 00 00 00 	movl   $0x8,(%rsp)
+ 234:	c7 44 24 04 30 00 00 	movl   $0x30,0x4(%rsp)
+ 23b:	00 
+ 23c:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 23e:	48 8d 84 24 e0 20 00 	lea    0x20e0(%rsp),%rax
+ 245:	00 
+ 246:	48 89 e1             	mov    %rsp,%rcx
+ 249:	48 89 ef             	mov    %rbp,%rdi
+ 24c:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+ 251:	48 8d 84 24 20 20 00 	lea    0x2020(%rsp),%rax
+ 258:	00 
+ 259:	48 89 44 24 10       	mov    %rax,0x10(%rsp)
+ 25e:	e8 00 00 00 00       	call   263 <printf+0xfb>
+ 263:	48 89 ef             	mov    %rbp,%rdi
+ 266:	e8 00 00 00 00       	call   26b <printf+0x103>
+ 26b:	be ff 1f 00 00       	mov    $0x1fff,%esi
+ 270:	48 89 ef             	mov    %rbp,%rdi
+ 273:	e8 00 00 00 00       	call   278 <printf+0x110>
+ 278:	ff c0                	inc    %eax
+ 27a:	48 8b 94 24 18 20 00 	mov    0x2018(%rsp),%rdx
+ 281:	00 
+ 282:	64 48 33 14 25 28 00 	xor    %fs:0x28,%rdx
+ 289:	00 00 
+ 28b:	74 05                	je     292 <printf+0x12a>
+ 28d:	e8 00 00 00 00       	call   292 <printf+0x12a>
+ 292:	48 81 c4 d0 20 00 00 	add    $0x20d0,%rsp
+ 299:	5d                   	pop    %rbp
+ 29a:	c3                   	ret    
+
+000000000000029b <print_code_from_v>:
+ 29b:	f3 0f 1e fa          	endbr64 
+ 29f:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 2a6 <print_code_from_v+0xb>
+ 2a6:	48 89 07             	mov    %rax,(%rdi)
+ 2a9:	48 8b 05 00 00 00 00 	mov    0x0(%rip),%rax        # 2b0 <print_code_from_v+0x15>
+ 2b0:	48 89 47 08          	mov    %rax,0x8(%rdi)
+ 2b4:	c3                   	ret    
+
+00000000000002b5 <manage_rsa>:
+ 2b5:	f3 0f 1e fa          	endbr64 
+ 2b9:	41 54                	push   %r12
+ 2bb:	49 89 fc             	mov    %rdi,%r12
+ 2be:	bf 80 01 00 00       	mov    $0x180,%edi
+ 2c3:	55                   	push   %rbp
+ 2c4:	53                   	push   %rbx
+ 2c5:	48 89 f3             	mov    %rsi,%rbx
+ 2c8:	48 81 ec b0 01 00 00 	sub    $0x1b0,%rsp
+ 2cf:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 2d6:	00 00 
+ 2d8:	48 89 84 24 a8 01 00 	mov    %rax,0x1a8(%rsp)
+ 2df:	00 
+ 2e0:	31 c0                	xor    %eax,%eax
+ 2e2:	c7 44 24 14 00 00 00 	movl   $0x0,0x14(%rsp)
+ 2e9:	00 
+ 2ea:	48 c7 44 24 18 00 00 	movq   $0x0,0x18(%rsp)
+ 2f1:	00 00 
+ 2f3:	e8 00 00 00 00       	call   2f8 <manage_rsa+0x43>
+ 2f8:	48 8b 0d 00 00 00 00 	mov    0x0(%rip),%rcx        # 2ff <manage_rsa+0x4a>
+ 2ff:	48 89 c5             	mov    %rax,%rbp
+ 302:	0f b6 01             	movzbl (%rcx),%eax
+ 305:	05 80 01 00 00       	add    $0x180,%eax
+ 30a:	89 c2                	mov    %eax,%edx
+ 30c:	c1 e0 18             	shl    $0x18,%eax
+ 30f:	c1 e2 08             	shl    $0x8,%edx
+ 312:	81 e2 00 00 ff 00    	and    $0xff0000,%edx
+ 318:	09 d0                	or     %edx,%eax
+ 31a:	89 44 24 14          	mov    %eax,0x14(%rsp)
+ 31e:	31 c0                	xor    %eax,%eax
+ 320:	48 89 c2             	mov    %rax,%rdx
+ 323:	48 f7 da             	neg    %rdx
+ 326:	8a 94 11 7f 01 00 00 	mov    0x17f(%rcx,%rdx,1),%dl
+ 32d:	88 54 05 00          	mov    %dl,0x0(%rbp,%rax,1)
+ 331:	48 ff c0             	inc    %rax
+ 334:	48 3d 80 01 00 00    	cmp    $0x180,%rax
+ 33a:	75 e4                	jne    320 <manage_rsa+0x6b>
+ 33c:	48 8d 4c 24 14       	lea    0x14(%rsp),%rcx
+ 341:	4c 8d 44 24 18       	lea    0x18(%rsp),%r8
+ 346:	48 89 ea             	mov    %rbp,%rdx
+ 349:	be 04 00 00 00       	mov    $0x4,%esi
+ 34e:	bf 80 01 00 00       	mov    $0x180,%edi
+ 353:	e8 00 00 00 00       	call   358 <manage_rsa+0xa3>
+ 358:	85 c0                	test   %eax,%eax
+ 35a:	74 07                	je     363 <manage_rsa+0xae>
+ 35c:	0f 10 45 00          	movups 0x0(%rbp),%xmm0
+ 360:	0f 11 03             	movups %xmm0,(%rbx)
+ 363:	31 c0                	xor    %eax,%eax
+ 365:	48 8d 7c 24 38       	lea    0x38(%rsp),%rdi
+ 36a:	b9 5c 00 00 00       	mov    $0x5c,%ecx
+ 36f:	41 b8 08 00 00 00    	mov    $0x8,%r8d
+ 375:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 377:	48 8b 7c 24 18       	mov    0x18(%rsp),%rdi
+ 37c:	4c 89 e1             	mov    %r12,%rcx
+ 37f:	48 8d 74 24 28       	lea    0x28(%rsp),%rsi
+ 384:	48 8d 54 24 20       	lea    0x20(%rsp),%rdx
+ 389:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+ 38e:	48 c7 44 24 28 01 00 	movq   $0x1,0x28(%rsp)
+ 395:	00 00 
+ 397:	48 c7 44 24 30 00 00 	movq   $0x0,0x30(%rsp)
+ 39e:	00 00 
+ 3a0:	48 c7 44 24 20 80 01 	movq   $0x180,0x20(%rsp)
+ 3a7:	00 00 
+ 3a9:	e8 00 00 00 00       	call   3ae <manage_rsa+0xf9>
+ 3ae:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
+ 3b3:	85 c0                	test   %eax,%eax
+ 3b5:	74 0c                	je     3c3 <manage_rsa+0x10e>
+ 3b7:	b9 1e 00 00 00       	mov    $0x1e,%ecx
+ 3bc:	48 89 df             	mov    %rbx,%rdi
+ 3bf:	f3 a4                	rep movsb %ds:(%rsi),%es:(%rdi)
+ 3c1:	eb 0a                	jmp    3cd <manage_rsa+0x118>
+ 3c3:	b9 80 00 00 00       	mov    $0x80,%ecx
+ 3c8:	48 89 df             	mov    %rbx,%rdi
+ 3cb:	f3 a5                	rep movsl %ds:(%rsi),%es:(%rdi)
+ 3cd:	48 8b 84 24 a8 01 00 	mov    0x1a8(%rsp),%rax
+ 3d4:	00 
+ 3d5:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
+ 3dc:	00 00 
+ 3de:	74 05                	je     3e5 <manage_rsa+0x130>
+ 3e0:	e8 00 00 00 00       	call   3e5 <manage_rsa+0x130>
+ 3e5:	48 81 c4 b0 01 00 00 	add    $0x1b0,%rsp
+ 3ec:	5b                   	pop    %rbx
+ 3ed:	5d                   	pop    %rbp
+ 3ee:	41 5c                	pop    %r12
+ 3f0:	c3                   	ret    
+
+00000000000003f1 <create_secret>:
+ 3f1:	f3 0f 1e fa          	endbr64 
+ 3f5:	48 83 ec 28          	sub    $0x28,%rsp
+ 3f9:	49 89 f1             	mov    %rsi,%r9
+ 3fc:	41 b8 10 00 00 00    	mov    $0x10,%r8d
+ 402:	48 89 fe             	mov    %rdi,%rsi
+ 405:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 40c:	00 00 
+ 40e:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+ 413:	31 c0                	xor    %eax,%eax
+ 415:	48 8d 4c 24 08       	lea    0x8(%rsp),%rcx
+ 41a:	ba 00 10 00 00       	mov    $0x1000,%edx
+ 41f:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 426 <create_secret+0x35>
+ 426:	48 c7 44 24 08 04 03 	movq   $0x1020304,0x8(%rsp)
+ 42d:	02 01 
+ 42f:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+ 436:	00 00 
+ 438:	e8 00 00 00 00       	call   43d <create_secret+0x4c>
+ 43d:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
+ 442:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
+ 449:	00 00 
+ 44b:	74 05                	je     452 <create_secret+0x61>
+ 44d:	e8 00 00 00 00       	call   452 <create_secret+0x61>
+ 452:	31 c0                	xor    %eax,%eax
+ 454:	48 83 c4 28          	add    $0x28,%rsp
+ 458:	c3                   	ret    
+
+0000000000000459 <create_secret1>:
+ 459:	f3 0f 1e fa          	endbr64 
+ 45d:	48 83 ec 28          	sub    $0x28,%rsp
+ 461:	49 89 fa             	mov    %rdi,%r10
+ 464:	49 89 f1             	mov    %rsi,%r9
+ 467:	48 89 d7             	mov    %rdx,%rdi
+ 46a:	48 8d 4c 24 08       	lea    0x8(%rsp),%rcx
+ 46f:	41 b8 10 00 00 00    	mov    $0x10,%r8d
+ 475:	ba 00 10 00 00       	mov    $0x1000,%edx
+ 47a:	4c 89 d6             	mov    %r10,%rsi
+ 47d:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 484:	00 00 
+ 486:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+ 48b:	31 c0                	xor    %eax,%eax
+ 48d:	48 c7 44 24 08 04 03 	movq   $0x1020304,0x8(%rsp)
+ 494:	02 01 
+ 496:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+ 49d:	00 00 
+ 49f:	e8 00 00 00 00       	call   4a4 <create_secret1+0x4b>
+ 4a4:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
+ 4a9:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
+ 4b0:	00 00 
+ 4b2:	74 05                	je     4b9 <create_secret1+0x60>
+ 4b4:	e8 00 00 00 00       	call   4b9 <create_secret1+0x60>
+ 4b9:	31 c0                	xor    %eax,%eax
+ 4bb:	48 83 c4 28          	add    $0x28,%rsp
+ 4bf:	c3                   	ret    
+
+00000000000004c0 <process_secret>:
+ 4c0:	f3 0f 1e fa          	endbr64 
+ 4c4:	48 83 ec 28          	sub    $0x28,%rsp
+ 4c8:	49 89 f1             	mov    %rsi,%r9
+ 4cb:	41 b8 10 00 00 00    	mov    $0x10,%r8d
+ 4d1:	48 89 fe             	mov    %rdi,%rsi
+ 4d4:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 4db:	00 00 
+ 4dd:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+ 4e2:	31 c0                	xor    %eax,%eax
+ 4e4:	48 8d 4c 24 08       	lea    0x8(%rsp),%rcx
+ 4e9:	ba 00 10 00 00       	mov    $0x1000,%edx
+ 4ee:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 4f5 <process_secret+0x35>
+ 4f5:	48 c7 44 24 08 04 03 	movq   $0x1020304,0x8(%rsp)
+ 4fc:	02 01 
+ 4fe:	48 c7 44 24 10 00 00 	movq   $0x0,0x10(%rsp)
+ 505:	00 00 
+ 507:	e8 00 00 00 00       	call   50c <process_secret+0x4c>
+ 50c:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
+ 511:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
+ 518:	00 00 
+ 51a:	74 05                	je     521 <process_secret+0x61>
+ 51c:	e8 00 00 00 00       	call   521 <process_secret+0x61>
+ 521:	31 c0                	xor    %eax,%eax
+ 523:	48 83 c4 28          	add    $0x28,%rsp
+ 527:	c3                   	ret    
+
+0000000000000528 <one_time_dump_memory>:
+ 528:	f3 0f 1e fa          	endbr64 
+ 52c:	41 54                	push   %r12
+ 52e:	55                   	push   %rbp
+ 52f:	53                   	push   %rbx
+ 530:	4c 8d 9c 24 00 00 ff 	lea    -0x10000(%rsp),%r11
+ 537:	ff 
+ 538:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+ 53f:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+ 544:	4c 39 dc             	cmp    %r11,%rsp
+ 547:	75 ef                	jne    538 <one_time_dump_memory+0x10>
+ 549:	48 83 ec 10          	sub    $0x10,%rsp
+ 54d:	bf 00 10 00 00       	mov    $0x1000,%edi
+ 552:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+ 559:	00 00 
+ 55b:	48 89 84 24 08 00 01 	mov    %rax,0x10008(%rsp)
+ 562:	00 
+ 563:	31 c0                	xor    %eax,%eax
+ 565:	48 89 f3             	mov    %rsi,%rbx
+ 568:	4c 8d 64 24 08       	lea    0x8(%rsp),%r12
+ 56d:	e8 00 00 00 00       	call   572 <one_time_dump_memory+0x4a>
+ 572:	48 8b 35 00 00 00 00 	mov    0x0(%rip),%rsi        # 579 <one_time_dump_memory+0x51>
+ 579:	b9 00 04 00 00       	mov    $0x400,%ecx
+ 57e:	0f 57 c0             	xorps  %xmm0,%xmm0
+ 581:	48 89 c7             	mov    %rax,%rdi
+ 584:	48 89 c5             	mov    %rax,%rbp
+ 587:	31 c0                	xor    %eax,%eax
+ 589:	f3 a5                	rep movsl %ds:(%rsi),%es:(%rdi)
+ 58b:	48 8d 7c 24 18       	lea    0x18(%rsp),%rdi
+ 590:	b9 fc 3f 00 00       	mov    $0x3ffc,%ecx
+ 595:	4c 89 e6             	mov    %r12,%rsi
+ 598:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 59a:	48 89 ef             	mov    %rbp,%rdi
+ 59d:	0f 11 44 24 08       	movups %xmm0,0x8(%rsp)
+ 5a2:	e8 00 00 00 00       	call   5a7 <one_time_dump_memory+0x7f>
+ 5a7:	b9 00 04 00 00       	mov    $0x400,%ecx
+ 5ac:	48 89 df             	mov    %rbx,%rdi
+ 5af:	4c 89 e6             	mov    %r12,%rsi
+ 5b2:	f3 a5                	rep movsl %ds:(%rsi),%es:(%rdi)
+ 5b4:	48 8b 84 24 08 00 01 	mov    0x10008(%rsp),%rax
+ 5bb:	00 
+ 5bc:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
+ 5c3:	00 00 
+ 5c5:	74 05                	je     5cc <one_time_dump_memory+0xa4>
+ 5c7:	e8 00 00 00 00       	call   5cc <one_time_dump_memory+0xa4>
+ 5cc:	48 81 c4 10 00 01 00 	add    $0x10010,%rsp
+ 5d3:	48 89 ef             	mov    %rbp,%rdi
+ 5d6:	5b                   	pop    %rbx
+ 5d7:	5d                   	pop    %rbp
+ 5d8:	41 5c                	pop    %r12
+ 5da:	e9 00 00 00 00       	jmp    5df <sgx_create_report_define>
+
+00000000000005df <sgx_create_report_define>:
+ 5df:	f3 0f 1e fa          	endbr64 
+ 5e3:	55                   	push   %rbp
+ 5e4:	31 c0                	xor    %eax,%eax
+ 5e6:	b9 20 00 00 00       	mov    $0x20,%ecx
+ 5eb:	48 89 e5             	mov    %rsp,%rbp
+ 5ee:	41 54                	push   %r12
+ 5f0:	53                   	push   %rbx
+ 5f1:	48 89 d3             	mov    %rdx,%rbx
+ 5f4:	48 81 e4 00 fe ff ff 	and    $0xfffffffffffffe00,%rsp
+ 5fb:	48 81 ec 00 06 00 00 	sub    $0x600,%rsp
+ 602:	48 8d bc 24 80 01 00 	lea    0x180(%rsp),%rdi
+ 609:	00 
+ 60a:	4c 8d a4 24 00 04 00 	lea    0x400(%rsp),%r12
+ 611:	00 
+ 612:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 614:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+ 61b:	00 
+ 61c:	b9 80 00 00 00       	mov    $0x80,%ecx
+ 621:	4c 89 e2             	mov    %r12,%rdx
+ 624:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 626:	48 8d bc 24 00 04 00 	lea    0x400(%rsp),%rdi
+ 62d:	00 
+ 62e:	b9 80 00 00 00       	mov    $0x80,%ecx
+ 633:	48 8d b4 24 80 01 00 	lea    0x180(%rsp),%rsi
+ 63a:	00 
+ 63b:	f3 ab                	rep stos %eax,%es:(%rdi)
+ 63d:	48 8d bc 24 00 02 00 	lea    0x200(%rsp),%rdi
+ 644:	00 
+ 645:	e8 00 00 00 00       	call   64a <sgx_create_report_define+0x6b>
+ 64a:	85 c0                	test   %eax,%eax
+ 64c:	75 13                	jne    661 <sgx_create_report_define+0x82>
+ 64e:	31 d2                	xor    %edx,%edx
+ 650:	49 8b 0c d4          	mov    (%r12,%rdx,8),%rcx
+ 654:	48 89 0c d3          	mov    %rcx,(%rbx,%rdx,8)
+ 658:	48 ff c2             	inc    %rdx
+ 65b:	48 83 fa 36          	cmp    $0x36,%rdx
+ 65f:	75 ef                	jne    650 <sgx_create_report_define+0x71>
+ 661:	85 c0                	test   %eax,%eax
+ 663:	0f 95 c0             	setne  %al
+ 666:	48 8d 65 f0          	lea    -0x10(%rbp),%rsp
+ 66a:	5b                   	pop    %rbx
+ 66b:	0f b6 c0             	movzbl %al,%eax
+ 66e:	41 5c                	pop    %r12
+ 670:	5d                   	pop    %rbp
+ 671:	c3                   	ret    
+
+0000000000000672 <worker>:
+ 672:	f3 0f 1e fa          	endbr64 
+ 676:	48 89 fe             	mov    %rdi,%rsi
+ 679:	31 ff                	xor    %edi,%edi
+ 67b:	e9 a8 fe ff ff       	jmp    528 <one_time_dump_memory>
+
+0000000000000680 <addint>:
+ 680:	f3 0f 1e fa          	endbr64 
+ 684:	55                   	push   %rbp
+ 685:	48 89 f5             	mov    %rsi,%rbp
+ 688:	53                   	push   %rbx
+ 689:	48 89 fb             	mov    %rdi,%rbx
+ 68c:	48 89 d7             	mov    %rdx,%rdi
+ 68f:	50                   	push   %rax
+ 690:	48 89 1d 00 00 00 00 	mov    %rbx,0x0(%rip)        # 697 <addint+0x17>
+ 697:	48 89 35 00 00 00 00 	mov    %rsi,0x0(%rip)        # 69e <addint+0x1e>
+ 69e:	e8 00 00 00 00       	call   6a3 <addint+0x23>
+ 6a3:	8d 04 2b             	lea    (%rbx,%rbp,1),%eax
+ 6a6:	5a                   	pop    %rdx
+ 6a7:	5b                   	pop    %rbx
+ 6a8:	5d                   	pop    %rbp
+ 6a9:	c3                   	ret    
+
+00000000000006aa <attacked>:
+ 6aa:	f3 0f 1e fa          	endbr64 
+ 6ae:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 6b5 <attacked+0xb>
+ 6b5:	48 89 c4             	mov    %rax,%rsp
+ 6b8:	48 81 c4 00 10 00 00 	add    $0x1000,%rsp
+ 6bf:	c3                   	ret    
+
+00000000000006c0 <do_eexit>:
+ 6c0:	f3 0f 1e fa          	endbr64 
+ 6c4:	48 83 ec 18          	sub    $0x18,%rsp
+ 6c8:	48 89 e7             	mov    %rsp,%rdi
+ 6cb:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+ 6d2:	00 
+ 6d3:	48 c7 44 24 08 00 00 	movq   $0x0,0x8(%rsp)
+ 6da:	00 00 
+ 6dc:	e8 00 00 00 00       	call   6e1 <do_eexit+0x21>
+ 6e1:	48 8b 34 24          	mov    (%rsp),%rsi
+ 6e5:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 6ec <do_eexit+0x2c>
+ 6ec:	31 c0                	xor    %eax,%eax
+ 6ee:	e8 00 00 00 00       	call   6f3 <do_eexit+0x33>
+ 6f3:	48 8b 1c 24          	mov    (%rsp),%rbx
+ 6f7:	48 89 5c 24 08       	mov    %rbx,0x8(%rsp)
+ 6fc:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
+ 701:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 708 <do_eexit+0x48>
+ 708:	31 c0                	xor    %eax,%eax
+ 70a:	e8 00 00 00 00       	call   70f <do_eexit+0x4f>
+ 70f:	48 8b 1c 24          	mov    (%rsp),%rbx
+ 713:	48 31 c0             	xor    %rax,%rax
+ 716:	b8 04 00 00 00       	mov    $0x4,%eax
+ 71b:	0f 01 d7             	enclu  
+ 71e:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
+ 723:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 72a <do_eexit+0x6a>
+ 72a:	31 c0                	xor    %eax,%eax
+ 72c:	e8 00 00 00 00       	call   731 <do_eexit+0x71>
+ 731:	48 83 c4 18          	add    $0x18,%rsp
+ 735:	c3                   	ret    
+
+0000000000000736 <gadget1>:
+ 736:	f3 0f 1e fa          	endbr64 
+ 73a:	58                   	pop    %rax
+ 73b:	48 83 c0 05          	add    $0x5,%rax
+ 73f:	48 89 c0             	mov    %rax,%rax
+ 742:	c3                   	ret    
+ 743:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 74a <gadget1+0x14>
+ 74a:	c3                   	ret    
+
+000000000000074b <gadget2>:
+ 74b:	f3 0f 1e fa          	endbr64 
+ 74f:	48 8b 3b             	mov    (%rbx),%rdi
+ 752:	5b                   	pop    %rbx
+ 753:	c3                   	ret    
+ 754:	c3                   	ret    
+
+0000000000000755 <gadget3>:
+ 755:	f3 0f 1e fa          	endbr64 
+ 759:	0f 01 d7             	enclu  
+ 75c:	c3                   	ret    
+
+000000000000075d <do_eexit_by_rop>:
+ 75d:	f3 0f 1e fa          	endbr64 
+ 761:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 768 <do_eexit_by_rop+0xb>
+ 768:	4c 8d 05 00 00 00 00 	lea    0x0(%rip),%r8        # 76f <do_eexit_by_rop+0x12>
+ 76f:	b9 0c 00 00 00       	mov    $0xc,%ecx
+ 774:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 77b <do_eexit_by_rop+0x1e>
+ 77b:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 782 <do_eexit_by_rop+0x25>
+ 782:	48 8d 15 00 00 00 00 	lea    0x0(%rip),%rdx        # 789 <do_eexit_by_rop+0x2c>
+ 789:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 790 <do_eexit_by_rop+0x33>
+ 790:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 797 <do_eexit_by_rop+0x3a>
+ 797:	48 8d 35 00 00 00 00 	lea    0x0(%rip),%rsi        # 79e <do_eexit_by_rop+0x41>
+ 79e:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 7a5 <do_eexit_by_rop+0x48>
+ 7a5:	48 89 05 00 00 00 00 	mov    %rax,0x0(%rip)        # 7ac <do_eexit_by_rop+0x4f>
+ 7ac:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 7b3 <do_eexit_by_rop+0x56>
+ 7b3:	48 89 15 00 00 00 00 	mov    %rdx,0x0(%rip)        # 7ba <do_eexit_by_rop+0x5d>
+ 7ba:	48 89 c7             	mov    %rax,%rdi
+ 7bd:	31 c0                	xor    %eax,%eax
+ 7bf:	4c 89 05 00 00 00 00 	mov    %r8,0x0(%rip)        # 7c6 <do_eexit_by_rop+0x69>
+ 7c6:	f3 a5                	rep movsl %ds:(%rsi),%es:(%rdi)
+ 7c8:	4c 89 c6             	mov    %r8,%rsi
+ 7cb:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 7d2 <do_eexit_by_rop+0x75>
+ 7d2:	48 8b 15 00 00 00 00 	mov    0x0(%rip),%rdx        # 7d9 <do_eexit_by_rop+0x7c>
+ 7d9:	e9 8a f9 ff ff       	jmp    168 <printf>
+
+00000000000007de <enclave_main>:
+ 7de:	f3 0f 1e fa          	endbr64 
+ 7e2:	48 89 3d 00 00 00 00 	mov    %rdi,0x0(%rip)        # 7e9 <enclave_main+0xb>
+ 7e9:	c3                   	ret    
