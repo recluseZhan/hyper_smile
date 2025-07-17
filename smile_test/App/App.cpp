@@ -44,7 +44,7 @@
 
 //
 #define KVM_HYPERCALL   ".byte 0x0f,0x01,0xc1"
-#define KVM_HC_VAPIC_POLL_IRQ  0
+#define KVM_HC_VAPIC_POLL_IRQ  1
 static inline long kvm_hypercall0(unsigned int nr)
 {
 	long ret;
