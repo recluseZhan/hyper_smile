@@ -2,6 +2,6 @@
 
 while true; do
   ./app
-  sleep 180
+  sleep 60
 done
 
