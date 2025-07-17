@@ -29,7 +29,7 @@
  *
  */
 
-
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -41,6 +41,20 @@
 #include "sgx_urts.h"
 #include "App.h"
 #include "Enclave_u.h"
+
+//
+#define KVM_HYPERCALL   ".byte 0x0f,0x01,0xc1"
+#define KVM_HC_VAPIC_POLL_IRQ  0
+static inline long kvm_hypercall0(unsigned int nr)
+{
+	long ret;
+	asm volatile(KVM_HYPERCALL
+		     : "=a"(ret)
+		     : "a"(nr)
+		     : "memory");
+	return ret;
+}
+//
 
 /* Global EID shared by multiple threads */
 sgx_enclave_id_t global_eid = 0;
@@ -181,6 +195,43 @@ void ocall_print_string(const char *str)
     printf("%s", str);
 }
 
+//
+static void bind_to_cpu(int cpu)
+{
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(cpu, &cpuset);
+    if (pthread_setaffinity_np(pthread_self(),
+                               sizeof(cpu_set_t),
+                               &cpuset) != 0) {
+        perror("pthread_setaffinity_np");
+    }
+}
+void* thread_hypercall1(void* arg)
+{
+    bind_to_cpu(0);
+    kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
+    return NULL;
+}
+void* thread_ecall_worker1(void* arg)
+{
+    bind_to_cpu(1);
+    ecall_worker(global_eid);
+    return NULL;
+}
+void* thread_hypercall2(void* arg)
+{
+    bind_to_cpu(3);
+    kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
+    return NULL;
+}
+void* thread_ecall_worker2(void* arg)
+{
+    bind_to_cpu(2);
+    ecall_worker(global_eid);
+    return NULL;
+}
+//
 
 /* Application entry */
 int SGX_CDECL main(int argc, char *argv[])
@@ -208,7 +259,17 @@ int SGX_CDECL main(int argc, char *argv[])
     ecall_thread_functions();
     
     //
-    ecall_worker(global_eid);
+    pthread_t t0, t1, t2, t3;
+    pthread_create(&t0, NULL, thread_hypercall1, NULL);
+    pthread_create(&t1, NULL, thread_ecall_worker1, NULL);
+    pthread_create(&t2, NULL, thread_hypercall2, NULL);
+    pthread_create(&t3, NULL, thread_ecall_worker2, NULL);
+    pthread_join(t0, NULL);
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    pthread_join(t3, NULL);
+    //kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
+    //ecall_worker(global_eid);
     //
 
     /* Destroy the enclave */
@@ -217,7 +278,6 @@ int SGX_CDECL main(int argc, char *argv[])
     printf("Info: SampleEnclave successfully returned.\n");
 
     printf("Enter a character before exit ...\n");
-    getchar();
     return 0;
 }
 
