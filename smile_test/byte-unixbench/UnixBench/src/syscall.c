@@ -28,8 +28,6 @@ char SCCSid[] = "@(#) @(#)syscall.c:3.3 -- 5/15/91 19:30:21";
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/syscall.h>
-#include <unistd.h>
 #include "timeit.c"
 
 unsigned long iter;
@@ -40,23 +38,12 @@ void report()
 	exit(0);
 }
 
-int create_fd()
-{
-	int fd[2];
-
-	if (pipe(fd) != 0 || close(fd[1]) != 0)
-	    exit(1);
-
-	return fd[0];
-}
-
 int main(argc, argv)
 int	argc;
 char	*argv[];
 {
         char   *test;
 	int	duration;
-	int	fd;
 
 	if (argc < 2) {
 		fprintf(stderr,"Usage: %s duration [ test ]\n", argv[0]);
@@ -76,25 +63,23 @@ char	*argv[];
 
         switch (test[0]) {
         case 'm':
-	   fd = create_fd();
 	   while (1) {
-		close(dup(fd));
-		syscall(SYS_getpid);
+		close(dup(0));
+		getpid();
 		getuid();
 		umask(022);
 		iter++;
 	   }
 	   /* NOTREACHED */
         case 'c':
-           fd = create_fd();
            while (1) {
-                close(dup(fd));
+                close(dup(0));
                 iter++;
            }
            /* NOTREACHED */
         case 'g':
            while (1) {
-                syscall(SYS_getpid);
+                getpid();
                 iter++;
            }
            /* NOTREACHED */
@@ -105,7 +90,7 @@ char	*argv[];
                     fprintf(stderr,"%s: fork failed\n", argv[0]);
                     exit(1);
                 } else if (pid == 0) {
-                    execl("/bin/true", "/bin/true", (char *) 0);
+                    execl("/bin/true", (char *) 0);
                     fprintf(stderr,"%s: exec /bin/true failed\n", argv[0]);
                     exit(1);
                 } else {

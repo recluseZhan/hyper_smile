@@ -80,8 +80,6 @@
 typedef int flag;
 
     
-#ifdef HAS_SELECT
-
 /*
 static inline int find_first_set_bit (CONST void *array, int size)
 */
@@ -145,8 +143,6 @@ static int find_next_set_bit (CONST void *array, int size, int offset)
     index += ul_size - offset;
     return (find_first_set_bit (++ul_array, size - index) + index);
 }   /*  End Function find_next_set_bit  */
-
-#endif  /* HAS_SELECT */
 
 
 struct callback_struct
@@ -249,7 +245,7 @@ static void time_poll (struct pollfd *pollfd_array, int start_index,
     short revents;
     int fd, count, nready;
     struct timeval time1, time2;
-    struct pollfd *pollfd_ptr;
+    struct pollfd *pollfd_ptr, *stop_pollfd;
 
     /*  Warm the cache a bit  */
     poll (pollfd_array + start_index, num_to_test, 0);
@@ -268,11 +264,11 @@ static void time_poll (struct pollfd *pollfd_array, int start_index,
 	    fprintf (stderr, "Error: nready: %d\n", nready);
 	    exit (1);
 	}
-	for (pollfd_ptr = pollfd_array + start_index; nready; ++pollfd_ptr)
+	stop_pollfd = pollfd_array + start_index + num_to_test;
+	for (pollfd_ptr = pollfd_array + start_index; TRUE; ++pollfd_ptr)
 	{
 	    if (pollfd_ptr->revents == 0) continue;
 	    /*  Have an active descriptor  */
-	    --nready;
 	    revents = pollfd_ptr->revents;
 	    fd = pollfd_ptr->fd;
 	    if (revents & POLLPRI)
@@ -281,6 +277,7 @@ static void time_poll (struct pollfd *pollfd_array, int start_index,
 		(*callbacks[fd].input_func) (callbacks[fd].info);
 	    if (revents & POLLOUT)
 		(*callbacks[fd].output_func) (callbacks[fd].info);
+	    if (--nready == 0) break;
 	}
 	gettimeofday (&time2, NULL);
 	times[count] = (time2.tv_sec - time1.tv_sec) * 1000000;
@@ -375,6 +372,9 @@ char	*argv[];
     struct poll2ifd poll2ifd_array[MAX_FDS];
     struct poll2ofd poll2ofd_array[MAX_FDS];
     long poll2_times[MAX_ITERATIONS];
+#endif
+#if 0
+    extern char *sys_errlist[];
 #endif
 
 #ifdef HAS_SELECT

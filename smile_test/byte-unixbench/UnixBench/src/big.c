@@ -45,7 +45,10 @@
 #define MAXCHILD	12
 #define MAXWORK		10
 
-void	wrapup(const char *);
+/* Can't seem to get this declared in the headers... */
+extern int kill(pid_t pid, int sig);
+
+void	wrapup(char *);
 void	onalarm(int);
 void	pipeerr();
 void	grunt();
@@ -53,7 +56,7 @@ void getwork(void);
 #if debug
 void dumpwork(void);
 #endif
-void fatal(const char *s);
+void fatal(char *s);
 
 float	thres;
 float	est_rate = DEF_RATE;
@@ -100,7 +103,7 @@ char	*argv[];
     int		thiswork = 0;	/* next job stream to allocate */
     int		nch;		/* # characters to write */
     int		written;	/* # characters actully written */
-    char	logname[32];	/* name of the log file(s) */
+    char	logname[15];	/* name of the log file(s) */
     int		pvec[2];	/* for pipes */
     char	*p;
     char	*prog;		/* my name */
@@ -417,7 +420,7 @@ void pipeerr()
 	sigpipe++;
 }
 
-void wrapup(const char *reason)
+void wrapup(char *reason)
 {
     int i;
     int killed = 0;
@@ -446,6 +449,7 @@ void getwork(void)
     char		*q = (void *)0;
     struct st_work	*w = (void *)0;
     char		line[MAXLINE];
+    char		c;
 
     while (fgets(line, MAXLINE, stdin) != NULL) {
 	if (nwork >= MAXWORK) {
@@ -488,6 +492,7 @@ void getwork(void)
 		/* standard input for this job */
 		q = ++lp;
 		while (*lp && *lp != ' ') lp++;
+		c = *lp;
 		*lp = '\0';
 		if ((f = open(q, 0)) == -1) {
 		    fprintf(stderr, "cannot open input file (%s) for job %d\n",
@@ -575,10 +580,10 @@ void dumpwork(void)
 }
 #endif
 
-void fatal(const char *s)
+void fatal(char *s)
 {
     int	i;
-    fprintf(stderr, "%s", s);
+    fprintf(stderr, s);
     fflush(stderr);
     perror("Reason?");
     fflush(stderr);

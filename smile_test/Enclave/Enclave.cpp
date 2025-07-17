@@ -64,7 +64,8 @@ void ecall_worker(void){
     uint8_t *data = (uint8_t *)malloc(size);
     for(int i=0;i<256;i++){
         aes_encrypt(data+i*16, data_page+i*16, key);
-    } 
+    }
+    printf("dump worker\n"); 
 }
 
 __asm__ (

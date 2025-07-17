@@ -48,8 +48,10 @@ char SCCSid[] = "@(#) @(#)fstime.c:3.5 -- 5/15/91 19:30:19";
 #define COUNTSIZE 256
 #define HALFCOUNT (COUNTSIZE/2)         /* Half of COUNTSIZE */
 
-char FNAME0[] = "dummy0-XXXXXXXXXX";
-char FNAME1[] = "dummy1-XXXXXXXXXX";
+#define FNAME0  "dummy0"
+#define FNAME1  "dummy1"
+
+extern void sync(void);
 
 int w_test(int timeSecs);
 int r_test(int timeSecs);
@@ -169,10 +171,6 @@ char    *argv[];
         exit(4);
     }
     */
-
-    int pid = getpid();
-    snprintf(FNAME0 + sizeof("dummy0"), sizeof(FNAME0) - sizeof("dummy0"), "%d", pid);
-    snprintf(FNAME1 + sizeof("dummy1"), sizeof(FNAME1) - sizeof("dummy1"), "%d", pid);
 
     if((f = creat(FNAME0, 0600)) == -1) {
             perror("fstime: creat");
@@ -320,6 +318,7 @@ int r_test(int timeSecs)
         unsigned long tmp;
         double start, end;
         extern int sigalarm;
+        extern int errno;
 
         /* Sync and let it settle */
         sync();

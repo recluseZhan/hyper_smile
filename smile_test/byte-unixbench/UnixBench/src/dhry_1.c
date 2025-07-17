@@ -74,13 +74,15 @@ Enumeration     Func_1 ();
 /* variables for time measurement: */
 
 #ifdef TIMES
-#include <time.h>
-#include <sys/times.h>
+struct tms      time_info;
+extern  int     times ();
+                /* see library function "times" */
 #define Too_Small_Time 120
                 /* Measurements should last at least about 2 seconds */
 #endif
 #ifdef TIME
-#include <time.h>
+extern long     time();
+                /* see library function "time"  */
 #define Too_Small_Time 2
                 /* Measurements should last at least 2 seconds */
 #endif

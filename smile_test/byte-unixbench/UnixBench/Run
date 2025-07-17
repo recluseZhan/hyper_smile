@@ -5,14 +5,8 @@ use strict;
 use POSIX qw(strftime);
 use Time::HiRes;
 use IO::Handle;
-use File::Path;
-use FindBin;
 
 
-############################################################################
-#  UnixBench - Release 6.0.0, based on:
-#  The BYTE UNIX Benchmarks - Release 5.1.3
-#
 ############################################################################
 #  UnixBench - Release 5.1.3, based on:
 #  The BYTE UNIX Benchmarks - Release 3
@@ -62,7 +56,6 @@ use FindBin;
 # 2007.10.14    IS      Set and report LANG.  Added "grep" and "sysexec".
 # 2007.12.22    IS      Tiny fixes; see README.
 # 2011.01.13    KDL     Fix for parallel compilation.
-# 2025.01.02	ZZK	Improve getCpuInfo() function for arm64 CPUs.
 
 
 ############################################################################
@@ -70,7 +63,7 @@ use FindBin;
 ############################################################################
 
 # Version number of the script.
-my $version = "6.0.0";
+my $version = "5.1.3";
 
 # The setting of LANG makes a huge difference to some of the scores,
 # particularly depending on whether UTF-8 is used.  So we always set
@@ -90,24 +83,22 @@ my $cCompiler = 'gcc';
 
 # Establish full paths to directories.  These need to be full pathnames
 # (or do they, any more?).  They can be set in env.
-# variable names are the first parameter to getDir() below.
+# variables whose names are the first parameter to getDir() below.
+my $BASEDIR = `pwd`;
+chomp($BASEDIR);
 
 # Directory where the test programs live.
-my $BINDIR = getDir('UB_BINDIR', $FindBin::Bin . "/pgms");
+my $BINDIR = getDir('UB_BINDIR', $BASEDIR . "/pgms");
 
 # Temp directory, for temp files.
-my $TMPDIR = getDir('UB_TMPDIR', $FindBin::Bin . "/tmp");
+my $TMPDIR = getDir('UB_TMPDIR', $BASEDIR . "/tmp");
 
 # Directory to put results in.
-my $RESULTDIR = getDir('UB_RESULTDIR', $FindBin::Bin . "/results");
+my $RESULTDIR = getDir('UB_RESULTDIR', $BASEDIR . "/results");
 
 # Directory where the tests are executed.
-my $TESTDIR = getDir('UB_TESTDIR', $FindBin::Bin . "/testdir");
+my $TESTDIR = getDir('UB_TESTDIR', $BASEDIR . "/testdir");
 
-my $quietMode = 0;
-my $notQuietMode = 1;
-my $verboseMode = 2;
-my $briefMode = 3;
 
 ############################################################################
 # TEST SPECIFICATIONS
@@ -115,10 +106,10 @@ my $briefMode = 3;
 
 # Configure the categories to which tests can belong.
 my $testCats = {
-    'system'    => { 'name' => "System Benchmarks", 'maxCopies' => 0 },
+    'system'    => { 'name' => "System Benchmarks", 'maxCopies' => 16 },
     '2d'        => { 'name' => "2D Graphics Benchmarks", 'maxCopies' => 1 },
     '3d'        => { 'name' => "3D Graphics Benchmarks", 'maxCopies' => 1 },
-    'misc'      => { 'name' => "Non-Index Benchmarks", 'maxCopies' => 0 },
+    'misc'      => { 'name' => "Non-Index Benchmarks", 'maxCopies' => 16 },
 };
 
 
@@ -521,115 +512,6 @@ my $x86CpuFlags = {
     'svm' => "AMD virtualization",
 };
 
-my $armCpuImplementers = {
-    '0x41' => "ARM",
-    '0x42' => "Broadcom",
-    '0x43' => "Cavium",
-    '0x46' => "FUJITSU",
-    '0x48' => "HiSilicon",
-    '0x4e' => "NVIDIA",
-    '0x50' => "APM",
-    '0x51' => "Qualcomm",
-    '0x61' => "Apple",
-    '0x6d' => "Microsoft",
-    '0xc0' => "Ampere",
-};
-
-my $armCpuParts = {
-    "ARM" => {
-        "0xd00" => "Foundation",
-        "0xd03" => "Cortex-A53",
-        "0xd04" => "Cortex-A35",
-        "0xd05" => "Cortex-A55",
-        "0xd07" => "Cortex-A57",
-        "0xd08" => "Cortex-A72",
-        "0xd09" => "Cortex-A73",
-        "0xd0a" => "Cortex-A75",
-        "0xd0b" => "Cortex-A76",
-        "0xd0c" => "Neoverse-N1",
-        "0xd0d" => "Cortex-A77",
-        "0xd0f" => "AEMv8",
-        "0xd40" => "Neoverse-V1",
-        "0xd41" => "Cortex-A78",
-        "0xd42" => "Cortex-A78AE",
-        "0xd44" => "Cortex-X1",
-        "0xd46" => "Cortex-A510",
-        "0xd47" => "Cortex-A710",
-        "0xd48" => "Cortex-X2",
-        "0xd49" => "Neoverse-N2",
-        "0xd4b" => "Cortex-A78C",
-        "0xd4c" => "Cortex-X1C",
-        "0xd4d" => "Cortex-A715",
-        "0xd4e" => "Cortex-X3",
-        "0xd4f" => "Neoverse-V2",
-        "0xd80" => "Cortex-A520",
-        "0xd81" => "Cortex-A720",
-        "0xd82" => "Cortex-X4",
-        "0xd84" => "Neoverse-V3",
-        "0xd85" => "Cortex-X925",
-        "0xd87" => "Cortex-A725",
-        "0xd8e" => "Neoverse-N3",
-    },
-    "APM" => {
-        "0x000" => "X-Gene",
-    },
-    "Cavium" => {
-        "0x0a1" => "ThunderX",
-        "0x0a2" => "ThunderX-81XX",
-        "0x0a3" => "ThunderX-83XX",
-        "0x0af" => "ThunderX2",
-        "0x0b1" => "OcteonTX2-98XX",
-        "0x0b2" => "OcteonTX2-96XX",
-        "0x0b3" => "OcteonTX2-95XX",
-        "0x0b4" => "OcteonTX2-95XXN",
-        "0x0b5" => "OcteonTX2-95XXMM",
-        "0x0b6" => "OcteonTX2-95XXO",
-    },
-    "Broadcom" => {
-        "0x100" => "Brahma-B53",
-        "0x516" => "Vulcan",
-    },
-    "Qualcomm" => {
-        "0x200" => "Kryo",
-        "0xc00" => "Falkor",
-        "0x800" => "Falkor-V1/Kryo-2XX-Gold",
-        "0x801" => "Kryo-2XX-Silver",
-        "0x803" => "Kryo-3XX-Silver",
-        "0x804" => "Kryo-4XX-Gold",
-        "0x805" => "Kryo-4XX-Silver",
-    },
-    "NVIDIA" => {
-        "0x003" => "Denver",
-        "0x004" => "Carmel",
-    },
-    "FUJITSU" => {
-        "0x001" => "A64FX",
-    },
-    "HiSilicon" => {
-        "0xd01" => "TaiShan-v110",
-    },
-    "Apple" => {
-        "0x022" => "Icestorm-M1",
-        "0x023" => "Firestorm-M1",
-        "0x024" => "Icestorm-M1-Pro",
-        "0x025" => "Firestorm-M1-Pro",
-        "0x028" => "Icestorm-M1-Max",
-        "0x029" => "Firestorm-M1-Max",
-        "0x032" => "Blizzard-M2",
-        "0x033" => "Avalanche-M2",
-        "0x034" => "Blizzard-M2-Pro",
-        "0x035" => "Avalanche-M2-Pro",
-        "0x038" => "Blizzard-M2-Max",
-        "0x039" => "Avalanche-M2-Max",
-    },
-    "Ampere" => {
-        "0xac3" => "Ampere-1",
-        "0xac4" => "Ampere-1a",
-    },
-    "Microsoft" => {
-        "0xd49" => "Azure-Cobalt-100",
-    },
-};
 
 ############################################################################
 # UTILITIES
@@ -688,33 +570,17 @@ sub getCmdOutput {
 sub getDir {
     my ( $var, $def ) = @_;
 
-    # If Environment variables(e.g. UB_RESULTDIR) is unset, use default value.
     my $val = $ENV{$var} || $def;
 
-    # Only "execl.c" test needs the Environment variable(UB_BINDIR).
+    # Canonicalise the value.
+    my $wd;
+    chomp($wd = `pwd`);
+    chdir($val);
+    chomp($val = `pwd`);
+    chdir($wd);
     $ENV{$var} = $val;
 
-    return $val;
-}
-
-# Create direcotry(0755) if not exists.
-sub createDirrectoriesIfNotExists {
-    foreach my $path (@_) {
-        my $isDirectoryNotExists = ! -d $path;
-        if ( $isDirectoryNotExists ) {
-            mkpath($path, {chmod => 0755});
-        }
-    }
-}
-
-# Show use directories.
-sub printUsingDirectories {
-    printf "------------------------------------------------------------------------------\n";
-    printf "   Use directories for:\n";
-    printf "      * File I/O tests (named fs***) = ${TMPDIR}\n";
-    printf "      * Results                      = ${RESULTDIR}\n";
-    printf "------------------------------------------------------------------------------\n";
-    printf "\n";
+    $val;
 }
 
 
@@ -723,18 +589,11 @@ sub printUsingDirectories {
 sub logFile {
     my ( $sysInfo ) = @_;
 
-    # If supplied output file name via Environment variable(UB_OUTPUT_FILE_NAME), then use it.
-    #   * If exists same file, it will be overwrite completly.
-    my $output_file_name_supplied_by_environment = $ENV{"UB_OUTPUT_FILE_NAME"};
-    if ( defined($output_file_name_supplied_by_environment) && $output_file_name_supplied_by_environment ne "" ) {
-        return ${RESULTDIR} . "/" . $output_file_name_supplied_by_environment;
-    }
-
+    my $count = 1;
 
     # Use the date in the base file name.
     my $ymd = strftime "%Y-%m-%d", localtime;
 
-    my $count = 1;
     while (1) {
         my $log = sprintf "%s/%s-%s-%02d",
                         ${RESULTDIR}, $sysInfo->{'name'}, $ymd, $count;
@@ -793,26 +652,6 @@ sub mergeParams {
 # SYSTEM ANALYSIS
 ############################################################################
 
-sub parseArmCpuImplementer {
-    my ( $implementerIdStr ) = @_;
-    my $CpuImplementer = $armCpuImplementers->{$implementerIdStr};
-    if (defined($CpuImplementer)) {
-	$CpuImplementer;
-    } else {
-	"CPU implementer $implementerIdStr";
-    }
-}
-
-sub parseArmCpuPart {
-    my ( $implementerIdStr, $partIdStr ) = @_;
-    my $CpuPart = $armCpuParts->{$implementerIdStr}->{$partIdStr};
-    if (defined($CpuPart)) {
-	$CpuPart;
-    } else {
-	"CPU part $partIdStr";
-    }
-}
-
 # Extract interesting flags from the given processor flags string and
 # convert them to descriptive names.
 sub processCpuFlags {
@@ -832,108 +671,31 @@ sub processCpuFlags {
 # array of N entries, one per CPU, where each entry is a hash containing
 # these fields:
 # describing the model etc.  Returns undef if the information can't be got.
-#
-# future: on systems without /proc/cpuinfo, might check for Perl modules:
-#   Sys::Info::Device::CPU or Sys::CpuAffinity
 sub getCpuInfo {
-    my $mach = $^O ne "aix"
-      ? getCmdOutput("uname -m")
-      : getCmdOutput("uname -p");
+    open(my $fd, "<", "/proc/cpuinfo") || return undef;
 
-    if (!("$^O" eq "darwin")) {
-        open(my $fd, "<", "/proc/cpuinfo") || return undef;
-
-        my $cpus = [ ];
-        my $cpu = 0;
-	my $armCpuImplementer="";
-        while (<$fd>) {
-            chomp;
-            my ( $field, $val ) = split(/[ \t]*:[ \t]*/);
-            next if (!$field || !$val);
-            if ($mach eq "aarch64") {
-                if ($field eq "processor") {
-                        $cpu = $val;
-                } elsif ($field eq "CPU implementer") {
-                        my $model = $val;
-                        $model =~ s/  +/ /g;
-                        $armCpuImplementer = parseArmCpuImplementer($model);
-                        $cpus->[$cpu]{'model'} = $armCpuImplementer;
-                } elsif ($field eq "CPU part" && $armCpuImplementer ne "") {
-                        my $armCpuPart = parseArmCpuPart($armCpuImplementer, $val);
-                        $cpus->[$cpu]{'model'} = "$armCpuImplementer $armCpuPart";
-                } elsif ($field eq "BogoMIPS") {
-                        $cpus->[$cpu]{'bogo'} = $val;
-                } elsif ($field eq "Features") {
-                        $cpus->[$cpu]{'flags'} = "CPU Features: $val";
-                }
-            } else {
-                if ($field eq "processor") {
-                        $cpu = $val;
-                } elsif ($field eq "model name") {
-                        my $model = $val;
-                        $model =~ s/  +/ /g;
-                        $cpus->[$cpu]{'model'} = $model;
-                } elsif ($field eq "bogomips" || $field eq "BogoMIPS") {
-                        $cpus->[$cpu]{'bogo'} = $val;
-                } elsif ($field eq "flags") {
-                        $cpus->[$cpu]{'flags'} = processCpuFlags($val);
-                }
-            }
-        }
-
-        close($fd);
-
-        $cpus;
-
-    } else {
-
-        my $model = getCmdOutput("sysctl -n machdep.cpu.brand_string");
-        my $flags = getCmdOutput("sysctl -n machdep.cpu.features | tr [A-Z] [a-z]");
-        my $ncpu  = getCmdOutput("sysctl -n hw.ncpu");
-
-        my $cpus = [ ];
-        my $cpu = 0;
-
-        for ($cpu = 0; $cpu < $ncpu; $cpu++) {
+    my $cpus = [ ];
+    my $cpu = 0;
+    while (<$fd>) {
+        chomp;
+        my ( $field, $val ) = split(/[ \t]*:[ \t]*/);
+        next if (!$field || !$val);
+        if ($field eq "processor") {
+            $cpu = $val;
+        } elsif ($field eq "model name") {
+            my $model = $val;
+            $model =~ s/  +/ /g;
             $cpus->[$cpu]{'model'} = $model;
-            $cpus->[$cpu]{'bogo'}  = 0;
-            $cpus->[$cpu]{'flags'} = processCpuFlags($flags);
+        } elsif ($field eq "bogomips") {
+            $cpus->[$cpu]{'bogo'} = $val;
+        } elsif ($field eq "flags") {
+            $cpus->[$cpu]{'flags'} = processCpuFlags($val);
         }
-        $cpus;
     }
-}
 
+    close($fd);
 
-# Get number of available (active) CPUs (not including disabled CPUs)
-# or, if not num of available CPUs, the total number of CPUs on the system
-# Returns undef if the information can't be obtained.
-#
-# There is no shortage of platform-specific methods to obtain this info.
-# This routine -is not- exhaustive, but adds some additional portability.
-# Most modern unix systems implement sysconf(_SC_NPROCESSORS_ONLN).
-sub getNumActiveCpus {
-    my $numCpus;
-
-    #(POSIX::_SC_NPROCESSORS_ONLN value not typically provided by POSIX.pm)
-    #$numCpus = POSIX::sysconf(POSIX::_SC_NPROCESSORS_ONLN);
-    #if (defined($numCpus)) { chomp $numCpus; return $numCpus if $numCpus; }
-
-    $numCpus = `getconf _NPROCESSORS_ONLN 2>/dev/null`;
-    if (defined($numCpus)) { chomp $numCpus; return $numCpus if $numCpus; }
-
-    $numCpus = `getconf NPROCESSORS_ONLN 2>/dev/null`;
-    if (defined($numCpus)) { chomp $numCpus; return $numCpus if $numCpus; }
-
-    $numCpus = `nproc 2>/dev/null`;
-    if (defined($numCpus)) { chomp $numCpus; return $numCpus if $numCpus; }
-
-    $numCpus = `python -c 'import os; print os.sysconf(os.sysconf_names["SC_NPROCESSORS_ONLN"]);' 2>/dev/null`;
-    if (defined($numCpus)) { chomp $numCpus; return $numCpus if $numCpus; }
-
-    # Windows
-    return $ENV{"NUMBER_OF_PROCESSORS"} if $ENV{"NUMBER_OF_PROCESSORS"};
-
-    return undef;
+    $cpus;
 }
 
 
@@ -953,7 +715,6 @@ sub getNumActiveCpus {
 #    load           System load message as per "uptime".
 #    numUsers       Number of users and/or open shell sessions.
 sub getSystemInfo {
-    my ( $verbose ) = @_;
     my $info = { };
 
     # Get host system data.
@@ -961,10 +722,8 @@ sub getSystemInfo {
     $info->{'os'} = getCmdOutput("uname -o") || getCmdOutput("uname -s");
     $info->{'osRel'} = getCmdOutput("uname -r");
     $info->{'osVer'} = getCmdOutput("uname -v");
-    $info->{'mach'} = $^O ne "aix"
-      ? getCmdOutput("uname -m")
-      : getCmdOutput("uname -p");
-    $info->{'platform'} = getCmdOutput("uname -i") || "unknown";
+    $info->{'mach'} = getCmdOutput("uname -m");
+    $info->{'platform'} = getCmdOutput("uname -i");
 
     # Get the system name (SUSE, Red Hat, etc.) if possible.
     $info->{'system'} = $info->{'os'};
@@ -976,37 +735,25 @@ sub getSystemInfo {
 
     # Get the language info.
     my $lang = getCmdOutput("printenv LANG");
-    my $map = $^O ne "aix"
-      ? getCmdOutput("locale -k LC_CTYPE | grep charmap") || ""
-      : getCmdOutput("locale charmap") || "";
+    my $map = getCmdOutput("locale -k LC_CTYPE | grep charmap");
     $map =~ s/.*=//;
-    my $coll = $^O ne "aix"
-      ? getCmdOutput("locale -k LC_COLLATE | grep collate-codeset") || ""
-      : getCmdOutput("locale | grep LC_COLLATE") || "";
+    my $coll = getCmdOutput("locale -k LC_COLLATE | grep collate-codeset");
     $coll =~ s/.*=//;
     $info->{'language'} = sprintf "%s (charmap=%s, collate=%s)",
                                    $lang, $map, $coll;
 
     # Get details on the CPUs, if possible.
-    if ($verbose != $briefMode) {
-        my $cpus = getCpuInfo();
-	if (defined($cpus)) {
-            $info->{'cpus'} = $cpus;
-            $info->{'numCpus'} = scalar(@$cpus);
-        }
-    }
-
-    # Get available number of CPUs (not disabled CPUs), if possible.
-    my $numCpus = getNumActiveCpus();
-    if (defined($numCpus)) {
-        $info->{'numCpus'} = $numCpus; # overwrite value from getCpuinfo()
+    my $cpus = getCpuInfo();
+    if (defined($cpus)) {
+        $info->{'cpus'} = $cpus;
+        $info->{'numCpus'} = scalar(@$cpus);
     }
 
     # Get graphics hardware info.
     $info->{'graphics'} = getCmdOutput("3dinfo | cut -f1 -d\'(\'");
 
     # Get system run state, load and usage info.
-    $info->{'runlevel'} = getCmdOutput("who -r | awk '{print \$3}'");
+    $info->{'runlevel'} = getCmdOutput("runlevel | cut -f2 -d\" \"");
     $info->{'load'} = getCmdOutput("uptime");
     $info->{'numUsers'} = getCmdOutput("who | wc -l");
 
@@ -1038,12 +785,11 @@ sub preChecks {
     $ENV{'LANG'} = $language;
 
     # Check that the required files are in the proper places.
-    my $make = $ENV{MAKE} || "make";
-    system("$make check");
+    system("make check");
     if ($? != 0) {
-        system("$make all");
+        system("make all");
         if ($? != 0) {
-            abortRun("\"$make all\" failed");
+            abortRun("\"make all\" failed");
         }
     }
 
@@ -1077,11 +823,9 @@ sub parseArgs {
                 die("Run: unknown test \"$word\"\n");
             }
         } elsif ($word eq "-q") {
-            $params->{'verbose'} = $quietMode;
+            $params->{'verbose'} = 0;
         } elsif ($word eq "-v") {
-            $params->{'verbose'} = $verboseMode;
-        } elsif ($word eq "-b") {
-            $params->{'verbose'} = $briefMode;
+            $params->{'verbose'} = 2;
         } elsif ($word eq "-i") {
             $params->{'iterations'} = shift(@words);
         } elsif ($word eq "-c") {
@@ -1186,12 +930,12 @@ sub combinePassResults {
 
         # If $timebase is 0 the figure is a rate; else compute
         # counts per $timebase.  $time is always seconds.
-        if ($timebase > 0 && $time > 0) {
+        if ($timebase > 0) {
             $sum += $count / ($time / $timebase);
-            $product += log($count) - log($time / $timebase) if ($count > 0);
+            $product += log($count) - log($time / $timebase);
         } else {
             $sum += $count;
-            $product += log($count) if ($count > 0);
+            $product += log($count);
         }
         $totalTime += $time;
     }
@@ -1269,7 +1013,7 @@ sub indexResults {
         $bresult->{'index'} = $ratio * 10;
 
         # Sun the scores, and count this test for this category.
-        $sum->{$cat} += log($ratio) if ($ratio > 0.000001);
+        $sum->{$cat} += log($ratio);
         ++$indexed->{$cat};
     }
 
@@ -1443,7 +1187,7 @@ sub runOnePass {
 
     # Get the command to run.
     my $command = $params->{'command'};
-    if ($verbose == $verboseMode) {
+    if ($verbose > 1) {
         printf "\n";
         printf "COMMAND: \"%s\"\n", $command;
         printf "COPIES: \"%d\"\n", $copies;
@@ -1510,7 +1254,7 @@ sub runBenchmark {
     # Set up the benchmark results structure.
     my $bresult = { 'name' => $bench, 'msg' => $params->{'logmsg'} };
 
-    if ($verbose > $quietMode) {
+    if ($verbose > 0) {
         printf "\n%d x %s ", $copies, $params->{'logmsg'};
     }
 
@@ -1531,7 +1275,7 @@ sub runBenchmark {
         # make an attempt to flush buffers
         system("sync; sleep 1; sync; sleep 2");
         # display heartbeat
-        if ($verbose > $quietMode) {
+        if ($verbose > 0) {
             printf " %d", $i;
         }
 
@@ -1561,7 +1305,7 @@ sub runBenchmark {
         unlink(${TESTDIR} . "/a.out");
     }
 
-    if ($verbose > $quietMode) {
+    if ($verbose > 0) {
         printf "\n";
     }
 
@@ -1585,7 +1329,7 @@ sub runTests {
         # If the benchmark doesn't want to run with this many copies, skip it.
         my $cat = $params->{'cat'};
         my $maxCopies = $testCats->{$cat}{'maxCopies'};
-        next if ($maxCopies > 0 && $copies > $maxCopies);
+        next if ($copies > $maxCopies);
 
         # Run the benchmark.
         my $bresult = runBenchmark($bench, $params, $verbose, $logFile, $copies);
@@ -1616,7 +1360,7 @@ sub runTests {
 # Display a banner indicating the configuration of the system under test
 # to the given file desc.
 sub displaySystem {
-    my ( $info, $fd, $verbose ) = @_;
+    my ( $info, $fd ) = @_;
 
     # Display basic system info.
     printf $fd "   System: %s: %s\n", $info->{'name'}, $info->{'system'};
@@ -1628,9 +1372,7 @@ sub displaySystem {
     # Get and display details on the CPUs, if possible.
     my $cpus = $info->{'cpus'};
     if (!defined($cpus)) {
-	if ($verbose != $briefMode) {
-            printf $fd "   CPU: no details available\n";
-	}
+        printf $fd "   CPU: no details available\n";
     } else {
         for (my $i = 0; $i <= $#$cpus; ++$i) {
             printf $fd "   CPU %d: %s (%.1f bogomips)\n",
@@ -1753,48 +1495,6 @@ sub summarizeRun {
 }
 
 
-# Write CSV Headers.
-#   e.g.: "Concurrency,Dhrystone 2 using register variables,Double-Precision Whetstone"
-#       
-sub summarizeRunCsvHeader {
-    my ( $results, $reportFd ) = @_;
-
-    # First col is for Concurrency value.
-    printf $reportFd "Concurrency";
-
-    # Write CSV Headers of test.
-    foreach my $bench (@{$results->{'list'}}) {
-        my $bresult = $results->{$bench};
-        printf $reportFd ",%s", $bresult->{'msg'};
-    }
-    printf $reportFd "\n";
-}
-
-# Write CSV data rows per concurrency as "./Run -c 1 -c 2".
-#   e.g.: 1,33526940.9,3623.9
-#         2,30386997.8,3678.8
-#         4,31439797.3,3781.4
-#         8,32872262.9,3826.2
-sub summarizeRunCsvRows {
-    my ( $results, $reportFd) = @_;
-
-    # Write concurrency value.
-    printf $reportFd "%d", $results->{'copies'};
-    
-    # Write test results.
-    my $isFirstColumn = 1;
-    foreach my $bench (@{$results->{'list'}}) {
-        my $bresult = $results->{$bench};
-
-        printf $reportFd ",%.1f", $bresult->{'score'};
-        $isFirstColumn = 0;
-    }
-
-    printf $reportFd "\n";
-}
-
-
-
 ############################################################################
 # HTML REPORTS
 ############################################################################
@@ -1848,7 +1548,7 @@ EOF
 # Display a banner indicating the configuration of the system under test
 # to the given file desc.
 sub displaySystemHtml {
-    my ( $info, $fd ,$verbose) = @_;
+    my ( $info, $fd ) = @_;
 
     printf $fd "<h3>Test System Information</h3>\n";
     printf $fd "<p><table>\n";
@@ -1874,12 +1574,10 @@ sub displaySystemHtml {
     # Get and display details on the CPUs, if possible.
     my $cpus = $info->{'cpus'};
     if (!defined($cpus)) {
-	if ($verbose != $briefMode) {
-            printf $fd "<tr>\n";
-            printf $fd "   <td><b>CPUs:</b></td>\n";
-            printf $fd "   <td colspan=2>no details available</td>\n";
-            printf $fd "</tr>\n";
-	}
+        printf $fd "<tr>\n";
+        printf $fd "   <td><b>CPUs:</b></td>\n";
+        printf $fd "   <td colspan=2>no details available</td>\n";
+        printf $fd "</tr>\n";
     } else {
         for (my $i = 0; $i <= $#$cpus; ++$i) {
             printf $fd "<tr>\n";
@@ -2053,7 +1751,7 @@ sub main {
     my @args = @_;
 
     my $params = parseArgs(@args);
-    my $verbose = $params->{'verbose'} || $notQuietMode;
+    my $verbose = $params->{'verbose'} || 1;
     if ($params->{'iterations'}) {
         $longIterCount = $params->{'iterations'};
         $shortIterCount = int(($params->{'iterations'} + 1) / 3);
@@ -2066,12 +1764,8 @@ sub main {
         $tests = $index;
     }
 
-    # Create directories.    
-    my @creatingDirectories = ( ${TMPDIR}, ${RESULTDIR} );
-    createDirrectoriesIfNotExists(@creatingDirectories);
-
     preChecks();
-    my $systemInfo = getSystemInfo($verbose);
+    my $systemInfo = getSystemInfo();
 
     # If the number of copies to run was not set, set it to 1
     # and the number of CPUs in the system (if > 1).
@@ -2086,12 +1780,7 @@ sub main {
     # Display the program banner.
     system("cat \"${BINDIR}/unixbench.logo\"");
 
-    # Show output output directories, if not in quiet mode.
-    if ($verbose > $quietMode) {
-        printUsingDirectories();
-    }
-
-    if ($verbose == $verboseMode) {
+    if ($verbose > 1) {
         printf "\n", join(", ", @$tests);
         printf "Tests to run: %s\n", join(", ", @$tests);
     }
@@ -2099,52 +1788,31 @@ sub main {
     # Generate unique file names for the report and log file.
     my $reportFile = logFile($systemInfo);
     my $reportHtml = $reportFile . ".html";
-    my $reportCsv = $reportFile . ".csv";
     my $logFile = $reportFile . ".log";
 
-    # If defined "UB_OUTPUT_CSV" on Environment, output csv file.
-    my $ubOutputCsv = $ENV{"UB_OUTPUT_CSV"};
-    my $isOutputFormatCsv = defined($ubOutputCsv) && $ubOutputCsv eq "true";
-    # If write CSV, header needs only once.
-    my $is_csv_header_written = 0;
-    
     # Open the log file for writing.
     open(my $reportFd, ">", $reportFile) ||
                             die("Run: can't write to $reportFile\n");
     open(my $reportFd2, ">", $reportHtml) ||
                             die("Run: can't write to $reportHtml\n");
-    my $reportFd_Csv;
-    if ($isOutputFormatCsv) {
-        open($reportFd_Csv, ">", $reportCsv) ||
-                            die("Run: can't write to $reportCsv\n");
-    }
-
     printf $reportFd "   BYTE UNIX Benchmarks (Version %s)\n\n", $version;
     runHeaderHtml($systemInfo, $reportFd2);
 
     # Dump information about the system under test.
-    displaySystem($systemInfo, $reportFd, $verbose);
-    displaySystemHtml($systemInfo, $reportFd2, $verbose);
+    displaySystem($systemInfo, $reportFd);
+    displaySystemHtml($systemInfo, $reportFd2);
 
     # Run the tests!  Do a test run once for each desired number of copies;
     # for example, on a 2-CPU system, we may do a single-processing run
     # followed by a dual-processing run.
     foreach my $c (@$copies) {
-        if ($verbose == $verboseMode) {
+        if ($verbose > 1) {
             printf "Run with %s\n", number($c, "copy", "copies");
         }
         my $results = runTests($tests, $verbose, $logFile, $c);
 
         summarizeRun($systemInfo, $results, $verbose, $reportFd);
         summarizeRunHtml($systemInfo, $results, $verbose, $reportFd2);
-
-        if ($isOutputFormatCsv) {
-            if ( $is_csv_header_written == 0 ) {
-                summarizeRunCsvHeader($results, $reportFd_Csv);
-                $is_csv_header_written = 1;
-            }
-            summarizeRunCsvRows($results, $reportFd_Csv);
-        }
     }
 
     runFooterHtml($reportFd2);
@@ -2152,12 +1820,9 @@ sub main {
     # Finish the report.
     close($reportFd);
     close($reportFd2);
-    if ($isOutputFormatCsv) {
-        close($reportFd_Csv);
-    }
 
     # Display the report, if not in quiet mode.
-    if ($verbose > $quietMode) {
+    if ($verbose > 0) {
         printf "\n";
         printf  "========================================================================\n";
         system("cat \"$reportFile\"");

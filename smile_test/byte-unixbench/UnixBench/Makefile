@@ -1,5 +1,5 @@
 ##############################################################################
-#	UnixBench v6.0.0
+#	UnixBench v5.1.3
 #  Based on The BYTE UNIX Benchmarks - Release 3
 #          Module: Makefile   SID: 3.9 5/15/91 19:30:15
 #
@@ -31,8 +31,6 @@
 #                    09/30/07 adding ubgears, GRAPHIC_TESTS switch
 #                    10/14/07 adding large.txt
 #                    01/13/11 added support for parallel compilation
-#                    01/07/16 [refer to version control commit messages and
-#                              cease using two-digit years in date formats]
 ##############################################################################
 
 ##############################################################################
@@ -41,9 +39,9 @@
 
 SHELL = /bin/sh
 
-# GRAPHIC TESTS: Uncomment the definition of "GRAPHIC_TESTS" to enable
+# GRAPHICS TESTS: Uncomment the definition of "GRAPHIC_TESTS" to enable
 # the building of the graphics benchmarks.  This will require the
-# X11 libraries on your system. (e.g. libX11-devel mesa-libGL-devel)
+# X11 libraries on your system.
 #
 # Comment the line out to disable these tests.
 # GRAPHIC_TESTS = defined
@@ -55,71 +53,32 @@ GL_LIBS = -lGL -lXext -lX11
 # COMPILER CONFIGURATION: Set "CC" to the name of the compiler to use
 # to build the binary benchmarks.  You should also set "$cCompiler" in the
 # Run script to the name of the compiler you want to test.
-CC?=gcc
+CC=gcc
 
 # OPTIMISATION SETTINGS:
-# Use gcc option if defined UB_GCC_OPTIONS via "Environment variable" or "Command-line arguments".
-ifdef UB_GCC_OPTIONS
-  OPTON = $(UB_GCC_OPTIONS)
 
-else
-  ## Very generic
-  #OPTON = -O
+## Very generic
+#OPTON = -O
 
-  ## For Linux 486/Pentium, GCC 2.7.x and 2.8.x
-  #OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math \
-  #	-m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2
+## For Linux 486/Pentium, GCC 2.7.x and 2.8.x
+#OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math \
+#	-m486 -malign-loops=2 -malign-jumps=2 -malign-functions=2
 
-  ## For Linux, GCC previous to 2.7.0
-  #OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math -m486
+## For Linux, GCC previous to 2.7.0
+#OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math -m486
 
-  #OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math \
-  #	-m386 -malign-loops=1 -malign-jumps=1 -malign-functions=1
+#OPTON = -O2 -fomit-frame-pointer -fforce-addr -fforce-mem -ffast-math \
+#	-m386 -malign-loops=1 -malign-jumps=1 -malign-functions=1
 
-  ## For Solaris 2, or general-purpose GCC 2.7.x
-  #OPTON = -O2 -fomit-frame-pointer -fforce-addr -ffast-math -Wall
+## For Solaris 2, or general-purpose GCC 2.7.x
+OPTON = -O2 -fomit-frame-pointer -fforce-addr -ffast-math -Wall
 
-  ## For Digital Unix v4.x, with DEC cc v5.x
-  #OPTON = -O4
-  #CFLAGS = -DTIME -std1 -verbose -w0
-
-  ## gcc optimization flags
-  ## (-ffast-math) disables strict IEEE or ISO rules/specifications for math funcs
-  OPTON = -O3 -ffast-math
-
-  ## OS detection.  Comment out if gmake syntax not supported by other 'make'. 
-  OSNAME:=$(shell uname -s)
-  ARCH ?= $(shell uname -m)
-  ifeq ($(OSNAME),Linux)
-    # Not all CPU architectures support "-march" or "-march=native".
-    #   - Supported    : x86, x86_64, ARM, AARCH64, riscv64, etc..
-    #   - Not Supported: IBM Power, etc...
-    ifeq ($(ARCH),$(filter $(ARCH),ppc64 ppc64le))
-        OPTON += -mcpu=native -mtune=native
-    else ifeq ($(ARCH),riscv64)
-        OPTON += -march=rv64g -mabi=lp64d
-    else
-        OPTON += -march=native -mtune=native
-    endif
-  endif
-
-  ifeq ($(OSNAME),Darwin)
-    # (adjust flags or comment out this section for older versions of XCode or OS X)
-    # (-mmacosx-versin-min= requires at least that version of SDK be installed)
-    ifneq ($(ARCH),$(filter $(ARCH),ppc64 ppc64le))
-        OPTON += -march=native -mmacosx-version-min=10.10
-    else
-        OPTON += -mcpu=native
-    endif
-    #http://stackoverflow.com/questions/9840207/how-to-use-avx-pclmulqdq-on-mac-os-x-lion/19342603#19342603
-    CFLAGS += -Wa,-q
-  endif
-
-endif
-
+## For Digital Unix v4.x, with DEC cc v5.x
+#OPTON = -O4
+#CFLAGS = -DTIME -std1 -verbose -w0
 
 ## generic gcc CFLAGS.  -DTIME must be included.
-CFLAGS += -Wall -pedantic $(OPTON) -I $(SRCDIR) -DTIME
+CFLAGS = -DTIME -Wall -pedantic -ansi
 
 
 ##############################################################################
@@ -145,7 +104,7 @@ SOURCES = arith.c big.c context1.c \
 	dhry_1.c dhry_2.c dhry.h whets.c ubgears.c
 TESTS = sort.src cctest.c dc.dat large.txt
 
-ifneq (,$(GRAPHIC_TESTS))
+ifdef GRAPHIC_TESTS
 GRAPHIC_BINS = $(PROGDIR)/ubgears
 else
 GRAPHIC_BINS =
@@ -169,15 +128,13 @@ REQD = $(BINS) $(PROGDIR)/unixbench.logo \
 	$(TESTDIR)/large.txt
 
 # ######################### the big ALL ############################
-all:
+all: distr programs
 ## Ick!!!  What is this about???  How about let's not chmod everything bogusly.
 #	@chmod 744 * $(SRCDIR)/* $(PROGDIR)/* $(TESTDIR)/* $(DOCDIR)/*
-	$(MAKE) distr
-	$(MAKE) programs
 
 # ####################### a check for Run ######################
 check: $(REQD)
-	$(MAKE) all
+	make all
 # ##############################################################
 # distribute the files out to subdirectories if they are in this one
 distr:
@@ -221,86 +178,76 @@ distr:
            echo "$(RESULTDIR)  exists" \
         ; fi
 
-.PHONY: all check distr programs run clean spotless
-
 programs: $(BINS)
 
-# (use $< to link only the first dependency, instead of $^,
-#  since the programs matching this pattern have only
-#  one input file, and others are #include "xxx.c"
-#  within the first.  (not condoning, just documenting))
-# (dependencies could be generated by modern compilers,
-#  but let's not assume modern compilers are present)
-$(PROGDIR)/%:
-	$(CC) -o $@ $(CFLAGS) $< $(LDFLAGS)
-
 # Individual programs
-# Sometimes the same source file is compiled in different ways.
-# This limits the 'make' patterns that can usefully be applied.
-
-$(PROGDIR)/arithoh:  $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/arithoh:  CFLAGS += -Darithoh
-$(PROGDIR)/register: $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/register: CFLAGS += -Ddatum='register int'
-$(PROGDIR)/short:    $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/short:    CFLAGS += -Ddatum=short
-$(PROGDIR)/int:      $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/int:      CFLAGS += -Ddatum=int
-$(PROGDIR)/long:     $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/long:     CFLAGS += -Ddatum=long
-$(PROGDIR)/float:    $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/float:    CFLAGS += -Ddatum=float
-$(PROGDIR)/double:   $(SRCDIR)/arith.c $(SRCDIR)/timeit.c
-$(PROGDIR)/double:   CFLAGS += -Ddatum=double
-
-$(PROGDIR)/poll:     $(SRCDIR)/time-polling.c
-$(PROGDIR)/poll:     CFLAGS += -DUNIXBENCH -DHAS_POLL
-$(PROGDIR)/poll2:    $(SRCDIR)/time-polling.c
-$(PROGDIR)/poll2:    CFLAGS += -DUNIXBENCH -DHAS_POLL2
-$(PROGDIR)/select:   $(SRCDIR)/time-polling.c
-$(PROGDIR)/select:   CFLAGS += -DUNIXBENCH -DHAS_SELECT
-
+$(PROGDIR)/arithoh:	$(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/arithoh ${CFLAGS} ${OPTON} -Darithoh $(SRCDIR)/arith.c
+$(PROGDIR)/register: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/register ${CFLAGS} ${OPTON} -Ddatum='register int' $(SRCDIR)/arith.c
+$(PROGDIR)/short: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/short ${CFLAGS} ${OPTON} -Ddatum=short $(SRCDIR)/arith.c
+$(PROGDIR)/int: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/int ${CFLAGS} ${OPTON} -Ddatum=int $(SRCDIR)/arith.c
+$(PROGDIR)/long: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/long ${CFLAGS} ${OPTON} -Ddatum=long $(SRCDIR)/arith.c
+$(PROGDIR)/float: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/float ${CFLAGS} ${OPTON} -Ddatum=float $(SRCDIR)/arith.c
+$(PROGDIR)/double: $(SRCDIR)/arith.c
+	$(CC) -o $(PROGDIR)/double ${CFLAGS} ${OPTON} -Ddatum=double $(SRCDIR)/arith.c
 $(PROGDIR)/whetstone-double: $(SRCDIR)/whets.c
-$(PROGDIR)/whetstone-double: CFLAGS += -DDP -DGTODay -DUNIXBENCH
-$(PROGDIR)/whetstone-double: LDFLAGS += -lm
+	$(CC) -o $(PROGDIR)/whetstone-double ${CFLAGS} ${OPTON} -DDP -DUNIX -DUNIXBENCH $(SRCDIR)/whets.c -lm
+$(PROGDIR)/hanoi: $(SRCDIR)/hanoi.c
+	$(CC) -o $(PROGDIR)/hanoi ${CFLAGS} ${OPTON} $(SRCDIR)/hanoi.c
 
-$(PROGDIR)/pipe: $(SRCDIR)/pipe.c $(SRCDIR)/timeit.c
+$(PROGDIR)/poll: $(SRCDIR)/time-polling.c
+	$(CC) -DHAS_POLL -DUNIXBENCH -o $(PROGDIR)/poll ${CFLAGS} ${OPTON} $(SRCDIR)/time-polling.c
 
-$(PROGDIR)/execl: $(SRCDIR)/execl.c $(SRCDIR)/big.c
+$(PROGDIR)/poll2: $(SRCDIR)/time-polling.c
+	$(CC) -DHAS_POLL2 -DUNIXBENCH -o $(PROGDIR)/poll2 ${CFLAGS} ${OPTON} $(SRCDIR)/time-polling.c
 
-$(PROGDIR)/spawn: $(SRCDIR)/spawn.c $(SRCDIR)/timeit.c
-
-$(PROGDIR)/hanoi: $(SRCDIR)/hanoi.c $(SRCDIR)/timeit.c
+$(PROGDIR)/select: $(SRCDIR)/time-polling.c
+	$(CC) -DHAS_SELECT -DUNIXBENCH -o $(PROGDIR)/select ${CFLAGS} ${OPTON} $(SRCDIR)/time-polling.c
 
 $(PROGDIR)/fstime: $(SRCDIR)/fstime.c
+	$(CC) -o $(PROGDIR)/fstime ${CFLAGS} ${OPTON} $(SRCDIR)/fstime.c
 
-$(PROGDIR)/syscall: $(SRCDIR)/syscall.c $(SRCDIR)/timeit.c
+$(PROGDIR)/syscall: $(SRCDIR)/syscall.c
+	$(CC) -o $(PROGDIR)/syscall ${CFLAGS} ${OPTON} $(SRCDIR)/syscall.c
+$(PROGDIR)/context1: $(SRCDIR)/context1.c
+	$(CC) -o $(PROGDIR)/context1 ${CFLAGS} ${OPTON} $(SRCDIR)/context1.c
+$(PROGDIR)/pipe: $(SRCDIR)/pipe.c
+	$(CC) -o $(PROGDIR)/pipe ${CFLAGS} ${OPTON} $(SRCDIR)/pipe.c
+$(PROGDIR)/spawn: $(SRCDIR)/spawn.c
+	$(CC) -o $(PROGDIR)/spawn ${CFLAGS} ${OPTON} $(SRCDIR)/spawn.c
+$(PROGDIR)/execl: $(SRCDIR)/execl.c $(SRCDIR)/big.c
+	$(CC) -o $(PROGDIR)/execl ${CFLAGS} ${OPTON} $(SRCDIR)/execl.c
 
-$(PROGDIR)/context1: $(SRCDIR)/context1.c $(SRCDIR)/timeit.c
+$(PROGDIR)/dhry2: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c $(SRCDIR)/dhry.h
+	cd $(SRCDIR); $(CC) -c ${CFLAGS} -DHZ=${HZ} ${OPTON} dhry_1.c
+	cd $(SRCDIR); $(CC) -c ${CFLAGS} -DHZ=${HZ} ${OPTON} dhry_2.c
+	$(CC) -o $(PROGDIR)/dhry2 ${CFLAGS} ${OPTON} $(SRCDIR)/dhry_1.o $(SRCDIR)/dhry_2.o
+	cd $(SRCDIR); rm -f dhry_1.o dhry_2.o
+$(PROGDIR)/dhry2reg: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c $(SRCDIR)/dhry.h
+	cd $(SRCDIR); $(CC) -c ${CFLAGS} -DREG=register -DHZ=${HZ} ${OPTON} dhry_1.c -o dhry_1_reg.o
+	cd $(SRCDIR); $(CC) -c ${CFLAGS} -DREG=register -DHZ=${HZ} ${OPTON} dhry_2.c -o dhry_2_reg.o
+	$(CC) -o $(PROGDIR)/dhry2reg ${CFLAGS} ${OPTON} $(SRCDIR)/dhry_1_reg.o $(SRCDIR)/dhry_2_reg.o
+	cd $(SRCDIR); rm -f dhry_1_reg.o dhry_2_reg.o
 
-$(PROGDIR)/looper: $(SRCDIR)/looper.c $(SRCDIR)/timeit.c
+$(PROGDIR)/looper: $(SRCDIR)/looper.c
+	$(CC) -o $(PROGDIR)/looper ${CFLAGS} ${OPTON} $(SRCDIR)/looper.c
 
 $(PROGDIR)/ubgears: $(SRCDIR)/ubgears.c
-$(PROGDIR)/ubgears: LDFLAGS += -lm $(GL_LIBS)
-
-$(PROGDIR)/dhry2: CFLAGS += -DHZ=${HZ}
-$(PROGDIR)/dhry2: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
-                  $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
-	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
-
-$(PROGDIR)/dhry2reg: CFLAGS += -DHZ=${HZ} -DREG=register
-$(PROGDIR)/dhry2reg: $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c \
-                     $(SRCDIR)/dhry.h $(SRCDIR)/timeit.c
-	$(CC) -o $@ ${CFLAGS} $(SRCDIR)/dhry_1.c $(SRCDIR)/dhry_2.c
+	$(CC) -o $(PROGDIR)/ubgears ${CFLAGS} ${OPTON} $(SRCDIR)/ubgears.c $(GL_LIBS)
 
 # Run the benchmarks and create the reports
 run:
 	sh ./Run
 
 clean:
-	$(RM) $(BINS) core *~ */*~
+	rm -f $(BINS) core *~ */*~
 
 spotless:	clean
-	$(RM) $(RESULTDIR)/* $(TMPDIR)/*
+	rm -f $(RESULTDIR)/* $(TMPDIR)/*
 
 ## END ##
