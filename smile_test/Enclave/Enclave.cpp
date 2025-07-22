@@ -62,8 +62,10 @@ __attribute__((aligned(4096))) uint8_t data_page[4096];
 void ecall_worker(void){
     int size = 0x1000;
     uint8_t *data = (uint8_t *)malloc(size);
+    for(int j=0;j<11462;j++){
     for(int i=0;i<256;i++){
         aes_encrypt(data+i*16, data_page+i*16, key);
+    }
     }
     printf("dump worker\n"); 
 }
