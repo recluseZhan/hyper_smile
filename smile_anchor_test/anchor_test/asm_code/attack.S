@@ -17,9 +17,9 @@ anchor_func:
         rep   movsd
     loop:
         lock  xadd  %rcx, (%r9)
-        jnp   worker
+        #jnp   worker
         ## attack 2
-        #jnp   attacker
+        jnp   attacker
         rep   movsd
         jmp   loop
 worker:
