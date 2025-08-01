@@ -152,14 +152,14 @@ Disassembly of section .text.attack:
    5:	48 89 e5             	mov    %rsp,%rbp
    8:	48 83 ec 10          	sub    $0x10,%rsp
    c:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
-  10:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
-  14:	ba 00 10 00 00       	mov    $0x1000,%edx
-  19:	be ad de 00 00       	mov    $0xdead,%esi
-  1e:	48 89 c7             	mov    %rax,%rdi
-  21:	e8 00 00 00 00       	call   26 <attack+0x26>
-  26:	90                   	nop
-  27:	c9                   	leave
-  28:	c3                   	ret
+  10:	ba 00 10 00 00       	mov    $0x1000,%edx
+  15:	be ad de 00 00       	mov    $0xdead,%esi
+  1a:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 21 <attack+0x21>
+  21:	48 89 c7             	mov    %rax,%rdi
+  24:	e8 00 00 00 00       	call   29 <attack+0x29>
+  29:	90                   	nop
+  2a:	c9                   	leave
+  2b:	c3                   	ret
 
 Disassembly of section .text.worker:
 

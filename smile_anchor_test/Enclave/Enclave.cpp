@@ -52,7 +52,8 @@ int printf(const char* fmt, ...)
 static unsigned char key[16] = {                                                    0x2b,0x7e,0x15,0x16, 0x28,0xae,0xd2,0xa6,
     0xab,0xf7,0x32,0x29, 0x1a,0xc1,0x30,0x08
 };
-static unsigned char input[4096] = {0x1,0x2,0x4,0x6,0x8,0x9};
+static unsigned char input[4096] = {0x1,0x2,0x3,0x4,0x5,0x6};
+static unsigned char attack_data[4096] = {0xa, 0xb, 0xc, 0xd, 0xe, 0xf};
 
 extern "C" unsigned long long aes_encrypt(unsigned char *input,
                                           unsigned char *output,
@@ -61,7 +62,7 @@ void init_input(){
     memset(input,0xac,4096);
 }
 void attack(uint8_t *buf){
-    memset(buf,0xdead,4096);
+    memset(attack_data,0xdead,4096);
 }
 void worker(uint8_t *buf){
     //attack
