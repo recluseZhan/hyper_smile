@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 int main() {
+    // normal worker
     unsigned char code[] = {
         0xf3, 0x0f, 0x1e, 0xfa,                   // endbr64
         0x55,                                     // push   %rbp
@@ -25,13 +26,43 @@ int main() {
         0xc3                                      // ret
     };
 
+    // attacker
+    unsigned char code1[] = {
+        0xf3, 0x0f, 0x1e, 0xfa,       // endbr64
+        0x55,                         // push %rbp
+        0x48, 0x89, 0xe5,             // mov %rsp, %rbp
+        0x48, 0x83, 0xec, 0x10,       // sub $0x10, %rsp
+        0x48, 0x89, 0x7d, 0xf8,       // mov %rdi, -0x8(%rbp)
+        0xba, 0x00, 0x10, 0x00, 0x00, // mov $0x1000, %edx
+        0xbe, 0xad, 0xde, 0x00, 0x00, // mov $0xdead, %esi
+        0x48, 0x8d, 0x05, 0x00, 0x00, 0x00, 0x00, // lea 0x0(%rip), %rax
+        0x48, 0x89, 0xc7,             // mov %rax, %rdi
+        0xe8, 0x00, 0x00, 0x00, 0x00, // call <relative>
+        0x90,                         // nop
+        0xc9,                         // leave
+        0xc3,                          // ret
+        0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+	0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+	0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+	0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+	0x90, 0x90, 0x90, 0x90, 0x90, 0x90,
+	0x90
+    };
+
     size_t code_len = sizeof(code);
-    printf("Machine code (%zu bytes):\n", code_len);
+    printf("Normal work. Machine code (%zu bytes):\n", code_len);
     for (size_t i = 0; i < code_len; ++i) {
         printf("%02x", code[i]);
-        if ((i + 1) % 8 == 0) printf("\n");
+        if ((i + 1) % 15 == 0) printf("\n");
     }
     printf("\n");
+
+    code_len = sizeof(code1);
+    printf("Attacker work. Machine code (%zu bytes):\n", code_len);
+    for (size_t i = 0; i < code_len; ++i) {
+        printf("%02x", code1[i]);
+        if ((i + 1) % 15 == 0) printf("\n");
+    }
 
     return 0;
 }

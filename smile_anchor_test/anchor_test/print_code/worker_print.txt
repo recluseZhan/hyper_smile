@@ -1,4 +1,4 @@
-Machine code (75 bytes):
+Normal work. Machine code (75 bytes):
 f30f1efa554889e5
 4883ec2048897de8
 c745fc00000000eb
@@ -9,3 +9,10 @@ c745fc00000000eb
 00008345fc01817d
 fcff0000007ed290
 90c9c3
+Attacker work. Machine code (44 bytes):
+f30f1efa554889e5
+4883ec1048897df8
+ba00100000beadde
+0000488d05000000
+004889c7e8000000
+0090c9c3
