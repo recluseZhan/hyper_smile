@@ -1,0 +1,8 @@
+Machine code (42 bytes):
+4c89d1488d3500
+b53900488dbe00
+004000f3a54c89
+d1488d35e3ffff
+fff3a5f0490fc1
+097b04f3a5ebf5
+

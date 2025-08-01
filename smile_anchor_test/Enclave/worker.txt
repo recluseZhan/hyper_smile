@@ -1,0 +1,187 @@
+
+Enclave.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <aes_encrypt>:
+   0:	f3 0f 6f 07          	movdqu (%rdi),%xmm0
+   4:	f3 0f 6f 2a          	movdqu (%rdx),%xmm5
+   8:	66 0f ef d2          	pxor   %xmm2,%xmm2
+   c:	66 0f 3a df c8 01    	aeskeygenassist $0x1,%xmm0,%xmm1
+  12:	e8 00 00 00 00       	call   17 <aes_encrypt+0x17>
+  17:	0f 28 f0             	movaps %xmm0,%xmm6
+  1a:	66 0f 3a df c8 02    	aeskeygenassist $0x2,%xmm0,%xmm1
+  20:	e8 00 00 00 00       	call   25 <aes_encrypt+0x25>
+  25:	0f 28 f8             	movaps %xmm0,%xmm7
+  28:	66 0f 3a df c8 04    	aeskeygenassist $0x4,%xmm0,%xmm1
+  2e:	e8 00 00 00 00       	call   33 <aes_encrypt+0x33>
+  33:	44 0f 28 c0          	movaps %xmm0,%xmm8
+  37:	66 0f 3a df c8 08    	aeskeygenassist $0x8,%xmm0,%xmm1
+  3d:	e8 00 00 00 00       	call   42 <aes_encrypt+0x42>
+  42:	44 0f 28 c8          	movaps %xmm0,%xmm9
+  46:	66 0f 3a df c8 10    	aeskeygenassist $0x10,%xmm0,%xmm1
+  4c:	e8 00 00 00 00       	call   51 <aes_encrypt+0x51>
+  51:	44 0f 28 d0          	movaps %xmm0,%xmm10
+  55:	66 0f 3a df c8 20    	aeskeygenassist $0x20,%xmm0,%xmm1
+  5b:	e8 00 00 00 00       	call   60 <aes_encrypt+0x60>
+  60:	44 0f 28 d8          	movaps %xmm0,%xmm11
+  64:	66 0f 3a df c8 40    	aeskeygenassist $0x40,%xmm0,%xmm1
+  6a:	e8 00 00 00 00       	call   6f <aes_encrypt+0x6f>
+  6f:	44 0f 28 e0          	movaps %xmm0,%xmm12
+  73:	66 0f 3a df c8 80    	aeskeygenassist $0x80,%xmm0,%xmm1
+  79:	e8 00 00 00 00       	call   7e <aes_encrypt+0x7e>
+  7e:	44 0f 28 e8          	movaps %xmm0,%xmm13
+  82:	66 0f 3a df c8 1b    	aeskeygenassist $0x1b,%xmm0,%xmm1
+  88:	e8 00 00 00 00       	call   8d <aes_encrypt+0x8d>
+  8d:	44 0f 28 f0          	movaps %xmm0,%xmm14
+  91:	66 0f 3a df c8 36    	aeskeygenassist $0x36,%xmm0,%xmm1
+  97:	e8 00 00 00 00       	call   9c <aes_encrypt+0x9c>
+  9c:	44 0f 28 f8          	movaps %xmm0,%xmm15
+
+00000000000000a0 <encrypt>:
+  a0:	66 0f ef c5          	pxor   %xmm5,%xmm0
+  a4:	66 0f 38 dc c6       	aesenc %xmm6,%xmm0
+  a9:	66 0f 38 dc c7       	aesenc %xmm7,%xmm0
+  ae:	66 41 0f 38 dc c0    	aesenc %xmm8,%xmm0
+  b4:	66 41 0f 38 dc c1    	aesenc %xmm9,%xmm0
+  ba:	66 41 0f 38 dc c2    	aesenc %xmm10,%xmm0
+  c0:	66 41 0f 38 dc c3    	aesenc %xmm11,%xmm0
+  c6:	66 41 0f 38 dc c4    	aesenc %xmm12,%xmm0
+  cc:	66 41 0f 38 dc c5    	aesenc %xmm13,%xmm0
+  d2:	66 41 0f 38 dc c6    	aesenc %xmm14,%xmm0
+  d8:	66 41 0f 38 dd c7    	aesenclast %xmm15,%xmm0
+  de:	f3 0f 7f 06          	movdqu %xmm0,(%rsi)
+  e2:	c3                   	ret
+
+00000000000000e3 <key_combine>:
+  e3:	66 0f 70 c9 ff       	pshufd $0xff,%xmm1,%xmm1
+  e8:	0f c6 d0 10          	shufps $0x10,%xmm0,%xmm2
+  ec:	66 0f ef c2          	pxor   %xmm2,%xmm0
+  f0:	0f c6 d0 8c          	shufps $0x8c,%xmm0,%xmm2
+  f4:	66 0f ef c2          	pxor   %xmm2,%xmm0
+  f8:	66 0f ef c1          	pxor   %xmm1,%xmm0
+  fc:	c3                   	ret
+
+Disassembly of section .text.printf:
+
+0000000000000000 <printf>:
+   0:	f3 0f 1e fa          	endbr64
+   4:	55                   	push   %rbp
+   5:	48 89 e5             	mov    %rsp,%rbp
+   8:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+   f:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+  14:	48 81 ec 00 10 00 00 	sub    $0x1000,%rsp
+  1b:	48 83 0c 24 00       	orq    $0x0,(%rsp)
+  20:	48 81 ec f0 00 00 00 	sub    $0xf0,%rsp
+  27:	48 89 bd 18 df ff ff 	mov    %rdi,-0x20e8(%rbp)
+  2e:	48 89 b5 58 ff ff ff 	mov    %rsi,-0xa8(%rbp)
+  35:	48 89 95 60 ff ff ff 	mov    %rdx,-0xa0(%rbp)
+  3c:	48 89 8d 68 ff ff ff 	mov    %rcx,-0x98(%rbp)
+  43:	4c 89 85 70 ff ff ff 	mov    %r8,-0x90(%rbp)
+  4a:	4c 89 8d 78 ff ff ff 	mov    %r9,-0x88(%rbp)
+  51:	84 c0                	test   %al,%al
+  53:	74 20                	je     75 <printf+0x75>
+  55:	0f 29 45 80          	movaps %xmm0,-0x80(%rbp)
+  59:	0f 29 4d 90          	movaps %xmm1,-0x70(%rbp)
+  5d:	0f 29 55 a0          	movaps %xmm2,-0x60(%rbp)
+  61:	0f 29 5d b0          	movaps %xmm3,-0x50(%rbp)
+  65:	0f 29 65 c0          	movaps %xmm4,-0x40(%rbp)
+  69:	0f 29 6d d0          	movaps %xmm5,-0x30(%rbp)
+  6d:	0f 29 75 e0          	movaps %xmm6,-0x20(%rbp)
+  71:	0f 29 7d f0          	movaps %xmm7,-0x10(%rbp)
+  75:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
+  7c:	00 00 
+  7e:	48 89 85 48 ff ff ff 	mov    %rax,-0xb8(%rbp)
+  85:	31 c0                	xor    %eax,%eax
+  87:	48 8d 95 40 df ff ff 	lea    -0x20c0(%rbp),%rdx
+  8e:	b8 00 00 00 00       	mov    $0x0,%eax
+  93:	b9 00 04 00 00       	mov    $0x400,%ecx
+  98:	48 89 d7             	mov    %rdx,%rdi
+  9b:	f3 48 ab             	rep stos %rax,%es:(%rdi)
+  9e:	c7 85 28 df ff ff 08 	movl   $0x8,-0x20d8(%rbp)
+  a5:	00 00 00 
+  a8:	c7 85 2c df ff ff 30 	movl   $0x30,-0x20d4(%rbp)
+  af:	00 00 00 
+  b2:	48 8d 45 10          	lea    0x10(%rbp),%rax
+  b6:	48 89 85 30 df ff ff 	mov    %rax,-0x20d0(%rbp)
+  bd:	48 8d 85 50 ff ff ff 	lea    -0xb0(%rbp),%rax
+  c4:	48 89 85 38 df ff ff 	mov    %rax,-0x20c8(%rbp)
+  cb:	48 8d 8d 28 df ff ff 	lea    -0x20d8(%rbp),%rcx
+  d2:	48 8b 95 18 df ff ff 	mov    -0x20e8(%rbp),%rdx
+  d9:	48 8d 85 40 df ff ff 	lea    -0x20c0(%rbp),%rax
+  e0:	be 00 20 00 00       	mov    $0x2000,%esi
+  e5:	48 89 c7             	mov    %rax,%rdi
+  e8:	e8 00 00 00 00       	call   ed <printf+0xed>
+  ed:	48 8d 85 40 df ff ff 	lea    -0x20c0(%rbp),%rax
+  f4:	48 89 c7             	mov    %rax,%rdi
+  f7:	e8 00 00 00 00       	call   fc <printf+0xfc>
+  fc:	48 8d 85 40 df ff ff 	lea    -0x20c0(%rbp),%rax
+ 103:	be ff 1f 00 00       	mov    $0x1fff,%esi
+ 108:	48 89 c7             	mov    %rax,%rdi
+ 10b:	e8 00 00 00 00       	call   110 <printf+0x110>
+ 110:	83 c0 01             	add    $0x1,%eax
+ 113:	48 8b 95 48 ff ff ff 	mov    -0xb8(%rbp),%rdx
+ 11a:	64 48 2b 14 25 28 00 	sub    %fs:0x28,%rdx
+ 121:	00 00 
+ 123:	74 05                	je     12a <printf+0x12a>
+ 125:	e8 00 00 00 00       	call   12a <printf+0x12a>
+ 12a:	c9                   	leave
+ 12b:	c3                   	ret
+
+Disassembly of section .text.init_input:
+
+0000000000000000 <init_input>:
+   0:	f3 0f 1e fa          	endbr64
+   4:	55                   	push   %rbp
+   5:	48 89 e5             	mov    %rsp,%rbp
+   8:	ba 00 10 00 00       	mov    $0x1000,%edx
+   d:	be ac 00 00 00       	mov    $0xac,%esi
+  12:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 19 <init_input+0x19>
+  19:	48 89 c7             	mov    %rax,%rdi
+  1c:	e8 00 00 00 00       	call   21 <init_input+0x21>
+  21:	90                   	nop
+  22:	5d                   	pop    %rbp
+  23:	c3                   	ret
+
+Disassembly of section .text.attack:
+
+0000000000000000 <attack>:
+   0:	f3 0f 1e fa          	endbr64
+   4:	55                   	push   %rbp
+   5:	48 89 e5             	mov    %rsp,%rbp
+   8:	48 83 ec 10          	sub    $0x10,%rsp
+   c:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+  10:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+  14:	ba 00 10 00 00       	mov    $0x1000,%edx
+  19:	be ad de 00 00       	mov    $0xdead,%esi
+  1e:	48 89 c7             	mov    %rax,%rdi
+  21:	e8 00 00 00 00       	call   26 <attack+0x26>
+  26:	90                   	nop
+  27:	c9                   	leave
+  28:	c3                   	ret
+
+Disassembly of section .text.worker:
+
+0000000000000000 <worker>:
+   0:	f3 0f 1e fa          	endbr64
+   4:	55                   	push   %rbp
+   5:	48 89 e5             	mov    %rsp,%rbp
+   8:	48 83 ec 20          	sub    $0x20,%rsp
+   c:	48 89 7d e8          	mov    %rdi,-0x18(%rbp)
+  10:	c7 45 fc 00 00 00 00 	movl   $0x0,-0x4(%rbp)
+  17:	eb 25                	jmp    3e <worker+0x3e>
+  19:	48 8b 45 e8          	mov    -0x18(%rbp),%rax
+  1d:	48 8d 48 10          	lea    0x10(%rax),%rcx
+  21:	48 8d 05 00 00 00 00 	lea    0x0(%rip),%rax        # 28 <worker+0x28>
+  28:	48 8d 15 00 00 00 00 	lea    0x0(%rip),%rdx        # 2f <worker+0x2f>
+  2f:	48 89 ce             	mov    %rcx,%rsi
+  32:	48 89 c7             	mov    %rax,%rdi
+  35:	e8 00 00 00 00       	call   3a <worker+0x3a>
+  3a:	83 45 fc 01          	addl   $0x1,-0x4(%rbp)
+  3e:	81 7d fc ff 00 00 00 	cmpl   $0xff,-0x4(%rbp)
+  45:	7e d2                	jle    19 <worker+0x19>
+  47:	90                   	nop
+  48:	90                   	nop
+  49:	c9                   	leave
+  4a:	c3                   	ret
