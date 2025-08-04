@@ -6,14 +6,14 @@ d1488d35e3ffff
 fff3a5f0490fc1
 097b04f3a5ebf5
 
-Attack all. Machine code (42 bytes):
+Attack all. Machine code (44 bytes):
 4c89d1488d3500
 b53900488dbe00
 4be8fff3a54c89
 d1488d35e3ffff
-fff3a5f0490fc1
-097b4ef3a5ebf5
-
+fff3a5eb55f049
+0fc1097b4ef3a5
+ebf5
 Attack 1 (jmp data). Machine code (42 bytes):
 4c89d1488d3500
 b53900488dbe00

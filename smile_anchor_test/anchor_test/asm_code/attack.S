@@ -3,18 +3,21 @@
 .global worker
 .global attacker
 anchor_func:
-        .fill 0x1000-42,1,0x90
+        .fill 0x1000-44,1,0x90
      anchor:
         mov   %r10, %rcx
         lea   0x39B500(%rip), %rsi
-        lea   0x400000(%rsi), %rdi
+        #lea   0x400000(%rsi), %rdi
         ## attack 1
-        #lea   -0x17B500(%rsi), %rdi # data_offset 0x220000
+        lea   -0x17B500(%rsi), %rdi # data_offset 0x220000
         rep   movsd
 
         mov   %r10, %rcx
         lea   -0x1d(%rip), %rsi
         rep   movsd
+
+        ## attack 3
+        jmp attacker
     loop:
         lock  xadd  %rcx, (%r9)
         #jnp   worker
