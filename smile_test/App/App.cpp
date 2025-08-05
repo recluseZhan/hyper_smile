@@ -221,13 +221,25 @@ void* thread_ecall_worker1(void* arg)
 }
 void* thread_hypercall2(void* arg)
 {
-    bind_to_cpu(3);
+    bind_to_cpu(2);
     kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
     return NULL;
 }
 void* thread_ecall_worker2(void* arg)
 {
-    bind_to_cpu(2);
+    bind_to_cpu(3);
+    ecall_worker(global_eid);
+    return NULL;
+}
+void* thread_hypercall3(void* arg)
+{
+    bind_to_cpu(4);
+    kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
+    return NULL;
+}
+void* thread_ecall_worker3(void* arg)
+{
+    bind_to_cpu(5);
     ecall_worker(global_eid);
     return NULL;
 }
@@ -259,15 +271,19 @@ int SGX_CDECL main(int argc, char *argv[])
     ecall_thread_functions();
     
     //
-    pthread_t t0, t1, t2, t3;
+    pthread_t t0, t1, t2, t3, t4, t5;
     pthread_create(&t0, NULL, thread_hypercall1, NULL);
     pthread_create(&t1, NULL, thread_ecall_worker1, NULL);
-    pthread_create(&t2, NULL, thread_hypercall2, NULL);
-    pthread_create(&t3, NULL, thread_ecall_worker2, NULL);
+    //pthread_create(&t2, NULL, thread_hypercall2, NULL);
+    //pthread_create(&t3, NULL, thread_ecall_worker2, NULL);
+    //pthread_create(&t4, NULL, thread_hypercall3, NULL);
+    //pthread_create(&t5, NULL, thread_ecall_worker3, NULL);
     pthread_join(t0, NULL);
     pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
-    pthread_join(t3, NULL);
+    //pthread_join(t2, NULL);
+    //pthread_join(t3, NULL);
+    //pthread_join(t4, NULL);
+    //pthread_join(t5, NULL);
     //kvm_hypercall0(KVM_HC_VAPIC_POLL_IRQ);
     //ecall_worker(global_eid);
     //
